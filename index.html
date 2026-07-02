@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fdf8f3">
+<title>Treeniappi</title>
+<style>
+  :root{
+    --bg:#fdf8f3; --card:#ffffff; --text:#3d3a4a; --muted:#9b95a8;
+    --line:#f0e9e1; --accent:#8b7ff0; --accent-soft:#f1eefe;
+    --green:#3ec6a8; --green-soft:#e9faf5; --red:#ff7f6e; --red-soft:#fff1ee;
+    --intervalli:#ff7f6e; --lihaskunto:#8b7ff0; --liikkuvuus:#3ec6a8; --peruskestavyys:#4aa8e8;
+    --intervalli-soft:#fff1ee; --lihaskunto-soft:#f1eefe; --liikkuvuus-soft:#e9faf5; --peruskestavyys-soft:#ecf5fd;
+    --radius:18px; --shadow:0 2px 10px rgba(120,100,140,.07);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; padding:0}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); font-size:16px; line-height:1.45;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
+  }
+  header.app{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    padding:16px 18px 8px; display:flex; align-items:center; gap:8px;
+  }
+  header.app h1{font-size:21px; margin:0; font-weight:800; letter-spacing:-.02em}
+  main{padding:0 14px; max-width:560px; margin:0 auto}
+
+  /* Tabs */
+  nav.tabs{
+    position:fixed; bottom:0; left:0; right:0; z-index:20;
+    display:flex; background:var(--card); border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+    box-shadow:0 -4px 16px rgba(120,100,140,.06);
+  }
+  nav.tabs button{
+    flex:1; background:none; border:none; padding:10px 0 9px; font-size:12px;
+    color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-family:inherit;
+  }
+  nav.tabs button .ico{
+    font-size:19px; line-height:1; padding:4px 16px; border-radius:999px; transition:background .15s;
+  }
+  nav.tabs button.active{color:var(--accent); font-weight:700}
+  nav.tabs button.active .ico{background:var(--accent-soft)}
+
+  .view{display:none}
+  .view.active{display:block}
+
+  /* Week nav */
+  .weeknav{display:flex; align-items:center; justify-content:space-between; margin:4px 0 10px}
+  .weeknav .wtitle{font-weight:800; font-size:17px; text-align:center}
+  .weeknav .wsub{font-size:12.5px; color:var(--muted); text-align:center}
+  .navbtn{
+    border:none; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    width:42px; height:42px; font-size:18px; cursor:pointer; color:var(--text);
+  }
+  .todaybtn{
+    display:block; margin:0 auto 14px; border:none; background:none; color:var(--accent);
+    font-size:13px; cursor:pointer; font-weight:700; font-family:inherit;
+  }
+
+  /* Weekly goals */
+  .goals{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:18px}
+  .goal{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:11px 12px; display:flex; align-items:center; gap:10px;
+    border:1.5px solid transparent;
+  }
+  .goal.met{border-color:var(--green); background:var(--green-soft)}
+  .goal .gico{
+    width:38px; height:38px; min-width:38px; border-radius:12px; display:flex; align-items:center;
+    justify-content:center; font-size:19px;
+  }
+  .goal .gname{font-size:12.5px; font-weight:700; line-height:1.2}
+  .goal .gcount{font-size:12px; color:var(--muted)}
+  .goal.met .gcount{color:var(--green); font-weight:700}
+
+  /* Day blocks */
+  .day{margin-bottom:16px}
+  .dayhead{display:flex; align-items:baseline; gap:8px; margin-bottom:7px; padding:0 4px}
+  .dayhead .dname{font-weight:800; font-size:14.5px}
+  .dayhead .ddate{color:var(--muted); font-size:13px}
+  .dayhead.today .dname{color:var(--accent)}
+  .dayhead .todaytag{
+    font-size:11px; background:var(--accent); color:#fff; border-radius:999px; padding:2px 9px; font-weight:700;
+  }
+  .wcard{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:11px 13px; margin-bottom:8px; display:flex; align-items:center; gap:12px;
+  }
+  .wcard .check{
+    width:30px; height:30px; min-width:30px; border-radius:50%; border:2px solid var(--line);
+    background:none; cursor:pointer; font-size:15px; line-height:1; color:#fff; padding:0;
+    transition:transform .1s;
+  }
+  .wcard .check:active{transform:scale(.88)}
+  .wcard.done{background:var(--green-soft)}
+  .wcard.done .check{background:var(--green); border-color:var(--green)}
+  .wcard.missed{background:var(--red-soft)}
+  .wcard .cico{
+    width:36px; height:36px; min-width:36px; border-radius:12px; display:flex;
+    align-items:center; justify-content:center; font-size:18px;
+  }
+  .wcard .info{flex:1; min-width:0; cursor:pointer}
+  .wcard .t{font-weight:700; font-size:15px}
+  .wcard.done .t{text-decoration:line-through; color:var(--muted)}
+  .wcard .c{font-size:12.5px; color:var(--muted)}
+  .wcard .missedtag{color:var(--red); font-size:12px; font-weight:700}
+  .addbtn{
+    width:100%; border:1.5px dashed #e3d9ce; background:none; border-radius:var(--radius);
+    padding:10px; color:var(--muted); font-size:13.5px; cursor:pointer; font-family:inherit;
+  }
+  .addbtn:active{background:var(--accent-soft)}
+  .restday{
+    text-align:center; color:var(--muted); font-size:13px; padding:2px 0 6px;
+  }
+
+  /* Cards & weight view */
+  .card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:15px; margin-bottom:14px;
+  }
+  .card h2{margin:0 0 10px; font-size:15px; font-weight:800}
+  .wform{display:flex; gap:8px}
+  .wform input{
+    border:1.5px solid var(--line); border-radius:12px; padding:10px; font-size:16px; font-family:inherit;
+    min-width:0; background:#fffdfb; color:var(--text);
+  }
+  .wform input#wkg{flex:1}
+  .wform input[type=date]{flex:1.4}
+  .btn{
+    background:var(--accent); color:#fff; border:none; border-radius:12px; padding:10px 16px;
+    font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .btn.ghost{background:var(--accent-soft); color:var(--accent)}
+
+  /* Goal progress */
+  .gprog-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
+  .gprog-pct{font-size:22px; font-weight:800; color:var(--accent)}
+  .bar{
+    height:16px; background:var(--accent-soft); border-radius:999px; overflow:hidden; position:relative;
+  }
+  .bar .fill{
+    height:100%; border-radius:999px; min-width:16px;
+    background:linear-gradient(90deg,#a99ff5,#8b7ff0);
+    transition:width .4s ease;
+  }
+  .bar-labels{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px}
+  .eta{
+    margin-top:12px; background:var(--accent-soft); border-radius:12px; padding:10px 12px;
+    font-size:13.5px; color:var(--text);
+  }
+  .goalform{display:flex; gap:8px; align-items:flex-end; margin-top:10px}
+  .goalform .gf{flex:1}
+  .goalform label{display:block; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:4px}
+  .goalform input{
+    width:100%; border:1.5px solid var(--line); border-radius:12px; padding:9px; font-size:16px;
+    font-family:inherit; background:#fffdfb; color:var(--text);
+  }
+  .editlink{background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; padding:0}
+
+  .stats{display:flex; gap:8px; margin-bottom:14px}
+  .stat{flex:1; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:11px 8px; text-align:center}
+  .stat .v{font-size:19px; font-weight:800}
+  .stat .v.down{color:var(--green)}
+  .stat .v.up{color:var(--red)}
+  .stat .l{font-size:11.5px; color:var(--muted)}
+  #chartwrap svg{width:100%; height:auto; display:block}
+  .legend{display:flex; gap:14px; font-size:12px; color:var(--muted); margin-top:6px}
+  .legend span::before{content:""; display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle}
+  .legend .lp::before{background:#e0d8ea}
+  .legend .lt::before{background:var(--accent)}
+  .legend .lg::before{background:var(--green); height:0; border-top:2px dashed var(--green)}
+
+  .wlist{list-style:none; margin:0; padding:0}
+  .wlist li{display:flex; justify-content:space-between; align-items:center; padding:8px 2px; border-bottom:1px solid var(--line); font-size:14.5px}
+  .wlist li:last-child{border-bottom:none}
+  .wlist .del{background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px 8px}
+
+  /* Dialog */
+  dialog{
+    border:none; border-radius:22px; padding:20px; width:min(92vw,420px);
+    box-shadow:0 12px 44px rgba(80,60,110,.22); color:var(--text);
+  }
+  dialog::backdrop{background:rgba(61,58,74,.4)}
+  dialog h3{margin:0 0 14px; font-size:17px; font-weight:800}
+  .field{margin-bottom:12px}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:5px; font-weight:700}
+  .field input{
+    width:100%; border:1.5px solid var(--line); border-radius:12px; padding:10px; font-size:16px;
+    font-family:inherit; background:#fffdfb; color:var(--text);
+  }
+  .catpick{display:flex; flex-wrap:wrap; gap:7px}
+  .catpick button{
+    border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:7px 13px;
+    font-size:13.5px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;
+    color:var(--text);
+  }
+  .catpick button.sel{border-color:var(--accent); background:var(--accent-soft); font-weight:700}
+  .dlgactions{display:flex; gap:8px; margin-top:16px}
+  .dlgactions .btn{flex:1}
+  .dlgactions .danger{background:var(--red-soft); color:var(--red)}
+  .muted{color:var(--muted); font-size:13px}
+  .empty-note{text-align:center; color:var(--muted); font-size:13.5px; padding:18px 0}
+</style>
+</head>
+<body>
+
+<header class="app"><h1 id="apptitle">Treeniappi 🌱</h1></header>
+
+<main>
+  <!-- VIIKKO -->
+  <section id="view-week" class="view active">
+    <div class="weeknav">
+      <button class="navbtn" id="prevweek" aria-label="Edellinen viikko">‹</button>
+      <div>
+        <div class="wtitle" id="weektitle"></div>
+        <div class="wsub" id="weekrange"></div>
+      </div>
+      <button class="navbtn" id="nextweek" aria-label="Seuraava viikko">›</button>
+    </div>
+    <button class="todaybtn" id="gotoday">Tämä viikko</button>
+    <div class="goals" id="summary"></div>
+    <div id="days"></div>
+  </section>
+
+  <!-- PAINO -->
+  <section id="view-weight" class="view">
+    <div class="card">
+      <h2>Kirjaa aamupaino ☀️</h2>
+      <div class="wform">
+        <input type="date" id="wdate">
+        <input type="text" id="wkg" inputmode="decimal" autocomplete="off" placeholder="kg">
+        <button class="btn" id="wsave">Tallenna</button>
+      </div>
+    </div>
+    <div class="card" id="goalcard"></div>
+    <div class="stats" id="wstats"></div>
+    <div class="card">
+      <h2>Kehitys</h2>
+      <div id="chartwrap"></div>
+      <div class="legend"><span class="lp">Päiväpaino</span><span class="lt">Trendi (7 pv)</span><span class="lg" id="goallegend" style="display:none">Tavoite</span></div>
+    </div>
+    <div class="card">
+      <h2>Viimeisimmät kirjaukset</h2>
+      <ul class="wlist" id="wlist"></ul>
+    </div>
+  </section>
+
+  <!-- MUUT -->
+  <section id="view-more" class="view">
+    <div class="card">
+      <h2>Varmuuskopio 💾</h2>
+      <p class="muted">Kaikki tietosi ovat tallessa vain tässä laitteessa. Ota varmuuskopio säännöllisesti – ja aina ennen puhelimen vaihtoa. Uudessa laitteessa tuot saman tiedoston takaisin.</p>
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn" id="exportbtn" style="flex:1">Vie tiedosto</button>
+        <button class="btn ghost" id="importbtn" style="flex:1">Tuo tiedosto</button>
+      </div>
+      <input type="file" id="importfile" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="card">
+      <h2>Viikkotavoitteet 🎯</h2>
+      <p class="muted">Ouran suosituksen mukaan: 1 × intervalli (pyörä tai hölkkä 30 min), 1 × lihaskunto (sali tai toiminnallinen ryhmäliikunta), 1 × liikkuvuus (jooga, pilates tms.) ja 1 × peruskestävyys (40–60 min).</p>
+    </div>
+    <div class="card">
+      <h2>Tietoa</h2>
+      <p class="muted" id="datainfo"></p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button data-view="week" class="active"><span class="ico">📅</span>Viikko</button>
+  <button data-view="weight"><span class="ico">📈</span>Paino</button>
+  <button data-view="more"><span class="ico">⚙️</span>Muut</button>
+</nav>
+
+<!-- Treenidialogi -->
+<dialog id="wdialog">
+  <h3 id="dlgtitle">Lisää treeni</h3>
+  <div class="field">
+    <label>Kategoria</label>
+    <div class="catpick" id="catpick"></div>
+  </div>
+  <div class="field">
+    <label>Treeni</label>
+    <input type="text" id="dlgname" placeholder="esim. 30 min pyöräintervallit">
+  </div>
+  <div class="field">
+    <label>Muistiinpano (valinnainen)</label>
+    <input type="text" id="dlgnote" placeholder="esim. painot, reitti, fiilis">
+  </div>
+  <div class="dlgactions">
+    <button class="btn danger" id="dlgdelete" style="display:none">Poista</button>
+    <button class="btn ghost" id="dlgcancel">Peruuta</button>
+    <button class="btn" id="dlgsave">Tallenna</button>
+  </div>
+</dialog>
+
+<script>
+"use strict";
+
+/* ---------- Data ---------- */
+const STORE_KEY = "treeniappi_v1";
+const CATS = {
+  intervalli:     { name:"Intervalli",     hint:"pyörä/hölkkä 30 min",   emoji:"⚡", hex:"#ff7f6e", soft:"#fff1ee", target:1 },
+  lihaskunto:     { name:"Lihaskunto",     hint:"sali/ryhmäliikunta",    emoji:"💪", hex:"#8b7ff0", soft:"#f1eefe", target:1 },
+  liikkuvuus:     { name:"Liikkuvuus",     hint:"jooga, pilates tms.",   emoji:"🧘", hex:"#3ec6a8", soft:"#e9faf5", target:1 },
+  peruskestavyys: { name:"Peruskestävyys", hint:"40–60 min",             emoji:"🚶", hex:"#4aa8e8", soft:"#ecf5fd", target:1 }
+};
+const CAT_MIGRATION = { voima:"lihaskunto", cardio:"intervalli", kavely:"peruskestavyys" };
+const DAYNAMES = ["Maanantai","Tiistai","Keskiviikko","Torstai","Perjantai","Lauantai","Sunnuntai"];
+
+let data = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d && Array.isArray(d.workouts) && Array.isArray(d.weights)){
+        d.workouts.forEach(w=>{ if(CAT_MIGRATION[w.cat]) w.cat = CAT_MIGRATION[w.cat]; });
+        if(!("goal" in d)) d.goal = null;
+        return d;
+      }
+    }
+  }catch(e){ console.warn("Load failed", e); }
+  return { workouts: [], weights: [], goal: null };
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ---------- Date helpers ---------- */
+function fmtISO(d){
+  const p = n => String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function parseISO(s){
+  const [y,m,dd] = s.split("-").map(Number);
+  return new Date(y, m-1, dd);
+}
+function todayISO(){ return fmtISO(new Date()); }
+function mondayOf(d){
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay()+6)%7));
+  return x;
+}
+function addDays(d, n){
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate()+n);
+  return x;
+}
+function isoWeek(d){
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = (x.getUTCDay()+6)%7;
+  x.setUTCDate(x.getUTCDate() - day + 3);
+  const firstThu = new Date(Date.UTC(x.getUTCFullYear(),0,4));
+  const fday = (firstThu.getUTCDay()+6)%7;
+  firstThu.setUTCDate(firstThu.getUTCDate() - fday + 3);
+  return 1 + Math.round((x - firstThu) / (7*24*3600*1000));
+}
+function fmtShort(d){ return d.getDate()+"."+(d.getMonth()+1)+"."; }
+function parseKg(v){
+  const kg = parseFloat(String(v).trim().replace(",","."));
+  return (isFinite(kg) && kg>0 && kg<400) ? Math.round(kg*10)/10 : null;
+}
+
+/* ---------- State ---------- */
+let weekStart = mondayOf(new Date());
+let dlgState = { id:null, date:null, cat:"intervalli" };
+let editingGoal = false;
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll("nav.tabs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+    if(btn.dataset.view==="weight") renderWeight();
+    if(btn.dataset.view==="more") renderMore();
+  });
+});
+
+/* ---------- Week view ---------- */
+document.getElementById("prevweek").addEventListener("click", ()=>{ weekStart = addDays(weekStart,-7); renderWeek(); });
+document.getElementById("nextweek").addEventListener("click", ()=>{ weekStart = addDays(weekStart, 7); renderWeek(); });
+document.getElementById("gotoday").addEventListener("click", ()=>{ weekStart = mondayOf(new Date()); renderWeek(); });
+
+function workoutsOn(dateISO){
+  return data.workouts.filter(w=>w.date===dateISO);
+}
+function renderWeek(){
+  const end = addDays(weekStart,6);
+  document.getElementById("weektitle").textContent = "Viikko " + isoWeek(weekStart);
+  document.getElementById("weekrange").textContent = fmtShort(weekStart)+" – "+fmtShort(end)+" "+end.getFullYear();
+
+  // Weekly goals vs done
+  const sums = {};
+  Object.keys(CATS).forEach(k=>sums[k]={done:0,total:0});
+  for(let i=0;i<7;i++){
+    workoutsOn(fmtISO(addDays(weekStart,i))).forEach(w=>{
+      if(!sums[w.cat]) return;
+      sums[w.cat].total++;
+      if(w.done) sums[w.cat].done++;
+    });
+  }
+  const sEl = document.getElementById("summary");
+  sEl.innerHTML = "";
+  Object.entries(CATS).forEach(([k,c])=>{
+    const s = sums[k];
+    const met = s.done >= c.target;
+    const g = document.createElement("div");
+    g.className = "goal" + (met ? " met" : "");
+    g.innerHTML =
+      '<div class="gico" style="background:'+c.soft+'">'+(met?"✅":c.emoji)+'</div>'
+      + '<div><div class="gname">'+c.name+'</div>'
+      + '<div class="gcount">'+(met ? "tavoite täynnä!" : s.done+"/"+c.target+(s.total>s.done?" · "+(s.total-s.done)+" suunniteltu":""))+'</div></div>';
+    sEl.appendChild(g);
+  });
+
+  // Days
+  const daysEl = document.getElementById("days");
+  daysEl.innerHTML = "";
+  const tISO = todayISO();
+  for(let i=0;i<7;i++){
+    const d = addDays(weekStart,i);
+    const dISO = fmtISO(d);
+    const isToday = dISO===tISO;
+
+    const day = document.createElement("div");
+    day.className = "day";
+    const head = document.createElement("div");
+    head.className = "dayhead" + (isToday?" today":"");
+    head.innerHTML = '<span class="dname">'+DAYNAMES[i]+'</span><span class="ddate">'+fmtShort(d)+'</span>'
+      + (isToday?'<span class="todaytag">tänään</span>':"");
+    day.appendChild(head);
+
+    workoutsOn(dISO).forEach(w=>{
+      const missed = !w.done && dISO < tISO;
+      const cat = CATS[w.cat] || {name:w.cat, emoji:"🏃", hex:"#999", soft:"#eee"};
+      const card = document.createElement("div");
+      card.className = "wcard" + (w.done?" done":"") + (missed?" missed":"");
+
+      const ico = document.createElement("div");
+      ico.className = "cico";
+      ico.style.background = cat.soft;
+      ico.textContent = cat.emoji;
+
+      const info = document.createElement("div");
+      info.className = "info";
+      info.innerHTML = '<div class="t">'+esc(w.title||cat.name)+'</div>'
+        + '<div class="c">'+cat.name + (w.note ? " · "+esc(w.note) : "") + '</div>'
+        + (missed ? '<div class="missedtag">jäi väliin</div>' : "");
+      info.addEventListener("click", ()=>openDialog(dISO, w));
+
+      const chk = document.createElement("button");
+      chk.className = "check";
+      chk.setAttribute("aria-label", w.done ? "Merkitse tekemättömäksi" : "Merkitse tehdyksi");
+      chk.textContent = w.done ? "✓" : "";
+      chk.addEventListener("click", ()=>{ w.done = !w.done; save(); renderWeek(); });
+
+      card.appendChild(ico);
+      card.appendChild(info);
+      card.appendChild(chk);
+      day.appendChild(card);
+    });
+
+    const add = document.createElement("button");
+    add.className = "addbtn";
+    add.textContent = "+ Lisää treeni";
+    add.addEventListener("click", ()=>openDialog(dISO, null));
+    day.appendChild(add);
+
+    daysEl.appendChild(day);
+  }
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, ch=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
+}
+
+/* ---------- Workout dialog ---------- */
+const dlg = document.getElementById("wdialog");
+function openDialog(dateISO, w){
+  dlgState = { id: w?w.id:null, date: dateISO, cat: w?w.cat:"intervalli" };
+  document.getElementById("dlgtitle").textContent = w ? "Muokkaa treeniä" : "Lisää treeni · "+fmtShort(parseISO(dateISO));
+  document.getElementById("dlgname").value = w ? (w.title||"") : "";
+  document.getElementById("dlgnote").value = w ? (w.note||"") : "";
+  document.getElementById("dlgdelete").style.display = w ? "block" : "none";
+  renderCatPick();
+  dlg.showModal();
+}
+function renderCatPick(){
+  const el = document.getElementById("catpick");
+  el.innerHTML = "";
+  Object.entries(CATS).forEach(([k,c])=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = k===dlgState.cat ? "sel" : "";
+    b.textContent = c.emoji+" "+c.name;
+    b.title = c.hint;
+    b.addEventListener("click", ()=>{ dlgState.cat = k; renderCatPick(); });
+    el.appendChild(b);
+  });
+}
+document.getElementById("dlgcancel").addEventListener("click", ()=>dlg.close());
+document.getElementById("dlgsave").addEventListener("click", ()=>{
+  const title = document.getElementById("dlgname").value.trim();
+  const note = document.getElementById("dlgnote").value.trim();
+  if(dlgState.id){
+    const w = data.workouts.find(x=>x.id===dlgState.id);
+    if(w){ w.cat = dlgState.cat; w.title = title; w.note = note; }
+  }else{
+    data.workouts.push({ id:uid(), date:dlgState.date, cat:dlgState.cat, title, note, done:false });
+  }
+  save(); dlg.close(); renderWeek();
+});
+document.getElementById("dlgdelete").addEventListener("click", ()=>{
+  data.workouts = data.workouts.filter(x=>x.id!==dlgState.id);
+  save(); dlg.close(); renderWeek();
+});
+
+/* ---------- Weight: trend & goal helpers ---------- */
+function trendSeries(weights){
+  return weights.map(w=>{
+    const t = parseISO(w.date).getTime();
+    const win = weights.filter(x=>{
+      const xt = parseISO(x.date).getTime();
+      return xt <= t && xt > t - 7*24*3600*1000;
+    });
+    const avg = win.reduce((s,x)=>s+x.kg,0)/win.length;
+    return { date:w.date, kg: avg };
+  });
+}
+function goalEstimate(trend, goalKg){
+  // slope from trend over last 30 days -> estimated goal date
+  if(trend.length < 2) return null;
+  const last = trend[trend.length-1];
+  const lastT = parseISO(last.date).getTime();
+  const window = trend.filter(t=>parseISO(t.date).getTime() >= lastT - 30*24*3600*1000);
+  if(window.length < 2) return null;
+  const first = window[0];
+  const days = (lastT - parseISO(first.date).getTime()) / (24*3600*1000);
+  if(days < 5) return null; // liian lyhyt jakso luotettavaan arvioon
+  const slope = (last.kg - first.kg) / days; // kg/day
+  const remaining = last.kg - goalKg;
+  if(remaining <= 0) return { reached:true };
+  if(slope >= -0.005) return { rising:true, weeklyRate: slope*7 };
+  const daysLeft = remaining / (-slope);
+  if(daysLeft > 730) return { slow:true, weeklyRate: slope*7 };
+  const target = addDays(parseISO(last.date), Math.round(daysLeft));
+  return { date: target, weeklyRate: slope*7 };
+}
+
+/* ---------- Weight view ---------- */
+document.getElementById("wsave").addEventListener("click", ()=>{
+  const dateEl = document.getElementById("wdate");
+  const kgEl = document.getElementById("wkg");
+  const date = dateEl.value;
+  const kg = parseKg(kgEl.value);
+  if(!date || kg===null){ kgEl.focus(); return; }
+  data.weights = data.weights.filter(w=>w.date!==date);
+  data.weights.push({date, kg});
+  data.weights.sort((a,b)=>a.date<b.date?-1:1);
+  save();
+  kgEl.value = "";
+  renderWeight();
+});
+
+function renderGoalCard(ws, trend){
+  const el = document.getElementById("goalcard");
+  const g = data.goal;
+
+  if(editingGoal || !g){
+    const startDefault = g ? g.startKg : (ws.length ? ws[0].kg : "");
+    const goalDefault = g ? g.goalKg : "";
+    el.innerHTML = '<h2>Tavoite 🎯</h2>'
+      + (g ? "" : '<p class="muted">Aseta aloituspaino ja tavoitepaino, niin näet matkasi edistymisen.</p>')
+      + '<div class="goalform">'
+      + '<div class="gf"><label>Aloituspaino</label><input type="text" inputmode="decimal" id="gstart" value="'+startDefault+'"></div>'
+      + '<div class="gf"><label>Tavoitepaino</label><input type="text" inputmode="decimal" id="ggoal" value="'+goalDefault+'"></div>'
+      + '<button class="btn" id="gsave">Tallenna</button>'
+      + '</div>';
+    el.querySelector("#gsave").addEventListener("click", ()=>{
+      const s = parseKg(el.querySelector("#gstart").value);
+      const t = parseKg(el.querySelector("#ggoal").value);
+      if(s===null || t===null || t>=s){
+        alert("Tarkista luvut: tavoitepainon pitää olla pienempi kuin aloituspainon.");
+        return;
+      }
+      data.goal = { startKg:s, goalKg:t };
+      editingGoal = false;
+      save(); renderWeight();
+    });
+    return;
+  }
+
+  const current = trend.length ? trend[trend.length-1].kg : g.startKg;
+  const total = g.startKg - g.goalKg;
+  const doneKg = Math.max(0, Math.min(total, g.startKg - current));
+  const pct = Math.round(doneKg/total*100);
+  const left = Math.max(0, current - g.goalKg);
+
+  let etaHtml = "";
+  const est = goalEstimate(trend, g.goalKg);
+  if(est){
+    if(est.reached){
+      etaHtml = '<div class="eta">🎉 <b>Tavoite saavutettu!</b> Hieno suoritus – nyt ylläpitovaihe.</div>';
+    }else if(est.rising){
+      etaHtml = '<div class="eta">Trendi on viimeisen 30 päivän ajalta tasainen tai nouseva, joten päivämääräarviota ei voi vielä laskea. Se ilmestyy tähän, kun trendi kääntyy laskuun – jatka kirjaamista! 💛</div>';
+    }else if(est.slow){
+      etaHtml = '<div class="eta">Trendi laskee nyt hyvin loivasti (' + Math.abs(est.weeklyRate).toFixed(2).replace(".",",") + ' kg/vko), joten arvioitu tavoitepäivä olisi yli 2 vuoden päässä. Kun vauhti kasvaa, tarkka arvio ilmestyy tähän. 💛</div>';
+    }else{
+      const d = est.date;
+      etaHtml = '<div class="eta">📅 Nykyvauhdilla (' + Math.abs(est.weeklyRate).toFixed(1).replace(".",",") + ' kg/vko) saavutat tavoitteen arviolta <b>'
+        + d.getDate()+"."+(d.getMonth()+1)+"."+d.getFullYear() + '</b>.</div>';
+    }
+  }
+
+  el.innerHTML = '<div class="gprog-head"><h2 style="margin:0">Matka tavoitteeseen 🎯</h2>'
+    + '<span class="gprog-pct">'+pct+'&nbsp;%</span></div>'
+    + '<div class="bar"><div class="fill" style="width:'+Math.max(3,pct)+'%"></div></div>'
+    + '<div class="bar-labels"><span>'+g.startKg.toFixed(1).replace(".",",")+' kg</span>'
+    + '<span><b>'+(left>0 ? "vielä "+left.toFixed(1).replace(".",",")+" kg" : "perillä!")+'</b></span>'
+    + '<span>'+g.goalKg.toFixed(1).replace(".",",")+' kg</span></div>'
+    + etaHtml
+    + '<div style="margin-top:10px; text-align:right"><button class="editlink" id="geditbtn">Muokkaa tavoitetta</button></div>';
+  el.querySelector("#geditbtn").addEventListener("click", ()=>{ editingGoal = true; renderWeight(); });
+}
+
+function renderWeight(){
+  const dateEl = document.getElementById("wdate");
+  if(!dateEl.value) dateEl.value = todayISO();
+
+  const ws = data.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
+  const trend = trendSeries(ws);
+  const statsEl = document.getElementById("wstats");
+  const chartEl = document.getElementById("chartwrap");
+  const listEl = document.getElementById("wlist");
+
+  renderGoalCard(ws, trend);
+
+  // Stats
+  statsEl.innerHTML = "";
+  if(ws.length){
+    const last = ws[ws.length-1];
+    const lastT = trend[trend.length-1];
+    const stats = [{ v: last.kg.toFixed(1).replace(".",","), l:"Viimeisin (kg)", cls:"" }];
+    [[7,"7 pv"],[30,"30 pv"]].forEach(([days,label])=>{
+      const limit = parseISO(last.date).getTime() - days*24*3600*1000;
+      const past = trend.filter(t=>parseISO(t.date).getTime() <= limit);
+      if(past.length){
+        const diff = lastT.kg - past[past.length-1].kg;
+        stats.push({ v:(diff>0?"+":"")+diff.toFixed(1).replace(".",","), l:"Trendi "+label, cls: diff<-0.05?"down":(diff>0.05?"up":"") });
+      }
+    });
+    stats.forEach(s=>{
+      const el = document.createElement("div");
+      el.className = "stat";
+      el.innerHTML = '<div class="v '+s.cls+'">'+s.v+'</div><div class="l">'+s.l+'</div>';
+      statsEl.appendChild(el);
+    });
+  }
+
+  // Chart (last 90 days)
+  chartEl.innerHTML = "";
+  const cutoff = fmtISO(addDays(new Date(),-90));
+  const cw = ws.filter(w=>w.date>=cutoff);
+  document.getElementById("goallegend").style.display = data.goal ? "" : "none";
+  if(cw.length < 2){
+    chartEl.innerHTML = '<div class="empty-note">Käyrä piirtyy, kun kirjauksia on vähintään kaksi. 📈</div>';
+  }else{
+    chartEl.appendChild(buildChart(cw, trend.filter(t=>t.date>=cutoff), data.goal ? data.goal.goalKg : null));
+  }
+
+  // List (latest 14)
+  listEl.innerHTML = "";
+  if(!ws.length){
+    listEl.innerHTML = '<div class="empty-note">Ei kirjauksia vielä.</div>';
+  }
+  ws.slice(-14).reverse().forEach(w=>{
+    const li = document.createElement("li");
+    const d = parseISO(w.date);
+    li.innerHTML = '<span>'+fmtShort(d)+d.getFullYear()+'</span><span><b>'+w.kg.toFixed(1).replace(".",",")+' kg</b></span>';
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "✕";
+    del.setAttribute("aria-label","Poista kirjaus");
+    del.addEventListener("click", ()=>{
+      if(confirm("Poistetaanko kirjaus "+fmtShort(d)+"?")){
+        data.weights = data.weights.filter(x=>x.date!==w.date);
+        save(); renderWeight();
+      }
+    });
+    li.appendChild(del);
+    listEl.appendChild(li);
+  });
+}
+
+function buildChart(points, trend, goalKg){
+  const W=560, H=300, padL=44, padR=12, padT=14, padB=30;
+  const t0 = parseISO(points[0].date).getTime();
+  const t1 = parseISO(points[points.length-1].date).getTime();
+  const span = Math.max(t1-t0, 24*3600*1000);
+  const kgs = points.map(p=>p.kg).concat(trend.map(t=>t.kg));
+  if(goalKg !== null) kgs.push(goalKg);
+  let min = Math.min(...kgs), max = Math.max(...kgs);
+  const pad = Math.max((max-min)*0.15, 0.5);
+  min -= pad; max += pad;
+
+  const X = t => padL + (t-t0)/span * (W-padL-padR);
+  const Y = kg => padT + (max-kg)/(max-min) * (H-padT-padB);
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS,"svg");
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+
+  // Y grid
+  const range = max-min;
+  const step = range>8 ? 2 : range>4 ? 1 : 0.5;
+  for(let v=Math.ceil(min/step)*step; v<=max; v+=step){
+    const y = Y(v);
+    const line = document.createElementNS(svgNS,"line");
+    line.setAttribute("x1",padL); line.setAttribute("x2",W-padR);
+    line.setAttribute("y1",y); line.setAttribute("y2",y);
+    line.setAttribute("stroke","#f0e9e1"); line.setAttribute("stroke-width","1");
+    svg.appendChild(line);
+    const txt = document.createElementNS(svgNS,"text");
+    txt.setAttribute("x",padL-7); txt.setAttribute("y",y+4);
+    txt.setAttribute("text-anchor","end");
+    txt.setAttribute("font-size","11"); txt.setAttribute("fill","#9b95a8");
+    txt.textContent = step<1 ? v.toFixed(1) : Math.round(v);
+    svg.appendChild(txt);
+  }
+  // X labels
+  [points[0], points[Math.floor(points.length/2)], points[points.length-1]].forEach((p,i)=>{
+    const d = parseISO(p.date);
+    const txt = document.createElementNS(svgNS,"text");
+    txt.setAttribute("x", X(d.getTime()));
+    txt.setAttribute("y", H-8);
+    txt.setAttribute("text-anchor", i===0?"start":(i===2?"end":"middle"));
+    txt.setAttribute("font-size","11"); txt.setAttribute("fill","#9b95a8");
+    txt.textContent = fmtShort(d);
+    svg.appendChild(txt);
+  });
+
+  // Goal line (dashed)
+  if(goalKg !== null && goalKg > min && goalKg < max){
+    const gl = document.createElementNS(svgNS,"line");
+    gl.setAttribute("x1",padL); gl.setAttribute("x2",W-padR);
+    gl.setAttribute("y1",Y(goalKg)); gl.setAttribute("y2",Y(goalKg));
+    gl.setAttribute("stroke","#3ec6a8"); gl.setAttribute("stroke-width","1.5");
+    gl.setAttribute("stroke-dasharray","6 4");
+    svg.appendChild(gl);
+  }
+
+  // Daily line (light)
+  const path = document.createElementNS(svgNS,"path");
+  path.setAttribute("d", points.map((p,i)=>(i?"L":"M")+X(parseISO(p.date).getTime()).toFixed(1)+" "+Y(p.kg).toFixed(1)).join(" "));
+  path.setAttribute("fill","none");
+  path.setAttribute("stroke","#e0d8ea");
+  path.setAttribute("stroke-width","1.5");
+  svg.appendChild(path);
+  points.forEach(p=>{
+    const c = document.createElementNS(svgNS,"circle");
+    c.setAttribute("cx",X(parseISO(p.date).getTime()));
+    c.setAttribute("cy",Y(p.kg));
+    c.setAttribute("r","2.6");
+    c.setAttribute("fill","#e0d8ea");
+    svg.appendChild(c);
+  });
+
+  // Trend line (bold)
+  const tpath = document.createElementNS(svgNS,"path");
+  tpath.setAttribute("d", trend.map((p,i)=>(i?"L":"M")+X(parseISO(p.date).getTime()).toFixed(1)+" "+Y(p.kg).toFixed(1)).join(" "));
+  tpath.setAttribute("fill","none");
+  tpath.setAttribute("stroke","#8b7ff0");
+  tpath.setAttribute("stroke-width","2.5");
+  tpath.setAttribute("stroke-linejoin","round");
+  svg.appendChild(tpath);
+
+  return svg;
+}
+
+/* ---------- More / backup ---------- */
+function renderMore(){
+  document.getElementById("datainfo").textContent =
+    "Treenejä kirjattu: " + data.workouts.length + " kpl · Painokirjauksia: " + data.weights.length + " kpl.";
+}
+document.getElementById("exportbtn").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "treeniappi-varmuuskopio-"+todayISO()+".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+document.getElementById("importbtn").addEventListener("click", ()=>document.getElementById("importfile").click());
+document.getElementById("importfile").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const d = JSON.parse(reader.result);
+      if(!d || !Array.isArray(d.workouts) || !Array.isArray(d.weights)) throw new Error("bad format");
+      if(confirm("Tuodaanko tiedostosta "+d.workouts.length+" treeniä ja "+d.weights.length+" painokirjausta? Ne yhdistetään nykyisiin tietoihin (mitään ei poisteta).")){
+        d.workouts.forEach(w=>{ if(CAT_MIGRATION[w.cat]) w.cat = CAT_MIGRATION[w.cat]; });
+        const byId = new Map(data.workouts.map(w=>[w.id,w]));
+        d.workouts.forEach(w=>byId.set(w.id,w));
+        data.workouts = [...byId.values()];
+        const byDate = new Map(data.weights.map(w=>[w.date,w]));
+        d.weights.forEach(w=>byDate.set(w.date,w));
+        data.weights = [...byDate.values()].sort((a,b)=>a.date<b.date?-1:1);
+        if(d.goal) data.goal = d.goal;
+        save(); renderWeek(); renderWeight(); renderMore();
+        alert("Tiedot tuotu ja yhdistetty.");
+      }
+    }catch(err){
+      alert("Tiedoston lukeminen epäonnistui – tarkista että valitsit oikean varmuuskopiotiedoston.");
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+});
+
+/* ---------- Init ---------- */
+renderWeek();
+renderWeight();
+/* v2 */
+</script>
+</body>
+</html>
