@@ -184,6 +184,38 @@
   .wlist li:last-child{border-bottom:none}
   .wlist .del{background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px 8px}
 
+  /* Sali */
+  .gymtitle{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+  .tpl{display:flex; align-items:center; gap:9px; padding:10px 0; border-bottom:1px solid var(--line)}
+  .tpl:last-of-type{border-bottom:none}
+  .tpl .tinfo{flex:1; min-width:0}
+  .tpl .tname{font-weight:700; font-size:15px}
+  .tpl .tmeta{font-size:12.5px; color:var(--muted)}
+  .iconbtn{background:var(--accent-soft); color:var(--accent); border:none; border-radius:10px; padding:9px 11px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:700}
+  .exrow{display:flex; gap:8px; align-items:center; margin-bottom:8px}
+  .exrow input[type=text]{flex:1; border:1.5px solid var(--line); border-radius:10px; padding:9px; font-size:15px; font-family:inherit; background:#fffdfb; min-width:0; color:var(--text)}
+  .stepper{display:flex; align-items:center; gap:5px}
+  .stepper button{width:28px; height:28px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--accent); font-weight:700; cursor:pointer; font-family:inherit; font-size:15px}
+  .stepper span{min-width:16px; text-align:center; font-weight:700; font-size:14px}
+  .exdel{background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:4px}
+  .excard .exname{font-weight:700; font-size:15px}
+  .exnote{width:100%; border:1.5px dashed var(--line); border-radius:10px; padding:8px; font-size:13px; font-family:inherit; background:none; color:var(--text); margin:7px 0 9px; resize:none}
+  .exnote::placeholder{color:var(--muted)}
+  .sethead,.setrow{display:grid; grid-template-columns:20px 1fr 66px 56px 34px; gap:7px; align-items:center; margin-bottom:6px}
+  .sethead{font-size:10.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.03em}
+  .setrow .snum{font-weight:700; color:var(--muted); font-size:13px}
+  .setrow .sprev{font-size:12.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .setrow input{border:1.5px solid var(--line); border-radius:9px; padding:7px 5px; font-size:15px; font-family:inherit; background:#fffdfb; width:100%; text-align:center; min-width:0; color:var(--text)}
+  .setrow.done input{background:var(--green-soft)}
+  .setrow .sdone{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:none; cursor:pointer; color:#fff; font-size:13px; padding:0}
+  .setrow.done .sdone{background:var(--green); border-color:var(--green)}
+  .addset{background:none; border:none; color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; padding:2px 0 0}
+  .histitem{padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer}
+  .histitem:last-child{border-bottom:none}
+  .histitem .hname{font-weight:700; font-size:14.5px}
+  .histitem .hmeta{font-size:12.5px; color:var(--muted)}
+  .histdetail{font-size:13px; color:var(--muted); margin-top:6px; line-height:1.65}
+
   /* Dialog */
   dialog{
     border:none; border-radius:22px; padding:20px; width:min(92vw,420px);
@@ -230,6 +262,9 @@
     <div class="goals" id="summary"></div>
     <div id="days"></div>
   </section>
+
+  <!-- SALI -->
+  <section id="view-gym" class="view"><div id="gymroot"></div></section>
 
   <!-- PAINO -->
   <section id="view-weight" class="view">
@@ -278,6 +313,7 @@
 
 <nav class="tabs">
   <button data-view="week" class="active"><span class="ico">📅</span>Viikko</button>
+  <button data-view="gym"><span class="ico">🏋️</span>Sali</button>
   <button data-view="weight"><span class="ico">📈</span>Paino</button>
   <button data-view="more"><span class="ico">⚙️</span>Muut</button>
 </nav>
@@ -327,11 +363,14 @@ function load(){
       if(d && Array.isArray(d.workouts) && Array.isArray(d.weights)){
         d.workouts.forEach(w=>{ if(CAT_MIGRATION[w.cat]) w.cat = CAT_MIGRATION[w.cat]; });
         if(!("goal" in d)) d.goal = null;
+        if(!Array.isArray(d.templates)) d.templates = [];
+        if(!Array.isArray(d.gymlog)) d.gymlog = [];
+        if(!("activeGym" in d)) d.activeGym = null;
         return d;
       }
     }
   }catch(e){ console.warn("Load failed", e); }
-  return { workouts: [], weights: [], goal: null };
+  return { workouts: [], weights: [], goal: null, templates: [], gymlog: [], activeGym: null };
 }
 function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -383,6 +422,7 @@ document.querySelectorAll("nav.tabs button").forEach(btn=>{
     btn.classList.add("active");
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     document.getElementById("view-"+btn.dataset.view).classList.add("active");
+    if(btn.dataset.view==="gym") renderGym();
     if(btn.dataset.view==="weight") renderWeight();
     if(btn.dataset.view==="more") renderMore();
   });
@@ -796,10 +836,273 @@ function buildChart(points, trend, goalKg){
   return svg;
 }
 
+/* ---------- Sali ---------- */
+let gymEdit = null;
+let histOpen = null;
+
+function fmtKgNum(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
+function lastPerformance(name){
+  const key = String(name).trim().toLowerCase();
+  for(let i=data.gymlog.length-1;i>=0;i--){
+    const ex = data.gymlog[i].exercises.find(e=>e.name.trim().toLowerCase()===key);
+    if(ex && ex.sets.length) return ex;
+  }
+  return null;
+}
+function renderGym(){
+  const root = document.getElementById("gymroot");
+  if(!root) return;
+  root.innerHTML = "";
+  if(data.activeGym) renderGymActive(root);
+  else if(gymEdit) renderGymEdit(root);
+  else renderGymHome(root);
+}
+function renderGymHome(root){
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = '<h2>Treenipohjat 🏋️</h2>';
+  if(!data.templates.length){
+    card.innerHTML += '<p class="muted">Luo pohja salitreenillesi: liikkeet ja sarjamäärät. Treeniä kirjatessa näet aina mitä teit viimeksi.</p>';
+  }
+  data.templates.forEach(t=>{
+    const row = document.createElement("div");
+    row.className = "tpl";
+    const logs = data.gymlog.filter(g=>g.templateId===t.id);
+    const last = logs.length ? logs[logs.length-1].date : null;
+    const meta = t.exercises.length + " liikettä" + (last ? " · viimeksi "+fmtShort(parseISO(last)) : "");
+    row.innerHTML = '<div class="tinfo"><div class="tname">'+esc(t.name)+'</div><div class="tmeta">'+meta+'</div></div>';
+    const editB = document.createElement("button");
+    editB.className = "iconbtn";
+    editB.textContent = "✎";
+    editB.setAttribute("aria-label","Muokkaa pohjaa");
+    editB.addEventListener("click", ()=>{ gymEdit = JSON.parse(JSON.stringify(t)); renderGym(); });
+    const startB = document.createElement("button");
+    startB.className = "btn";
+    startB.style.padding = "8px 14px";
+    startB.textContent = "Aloita";
+    startB.addEventListener("click", ()=>startGym(t));
+    row.appendChild(editB);
+    row.appendChild(startB);
+    card.appendChild(row);
+  });
+  const newB = document.createElement("button");
+  newB.className = "btn ghost";
+  newB.style.cssText = "width:100%; margin-top:10px";
+  newB.textContent = "+ Uusi pohja";
+  newB.addEventListener("click", ()=>{ gymEdit = { id:null, name:"", exercises:[{name:"", sets:3, note:""}] }; renderGym(); });
+  card.appendChild(newB);
+  root.appendChild(card);
+
+  const hist = document.createElement("div");
+  hist.className = "card";
+  hist.innerHTML = '<h2>Historia</h2>';
+  if(!data.gymlog.length){
+    hist.innerHTML += '<div class="empty-note">Ei salitreenejä vielä.</div>';
+  }
+  data.gymlog.slice(-15).reverse().forEach(g=>{
+    const item = document.createElement("div");
+    item.className = "histitem";
+    const setCount = g.exercises.reduce((s,e)=>s+e.sets.length,0);
+    item.innerHTML = '<div class="hname">'+esc(g.name)+' · '+fmtShort(parseISO(g.date))+'</div>'
+      + '<div class="hmeta">'+g.exercises.length+' liikettä · '+setCount+' sarjaa</div>';
+    if(histOpen===g.id){
+      const det = document.createElement("div");
+      det.className = "histdetail";
+      det.innerHTML = g.exercises.map(e=>'<b>'+esc(e.name)+':</b> '+e.sets.map(s=>fmtKgNum(s.kg)+'×'+s.reps).join(", ")).join("<br>");
+      item.appendChild(det);
+    }
+    item.addEventListener("click", ()=>{ histOpen = histOpen===g.id ? null : g.id; renderGym(); });
+    hist.appendChild(item);
+  });
+  root.appendChild(hist);
+}
+function syncGymEditFromDOM(root){
+  const name = root.querySelector("#tplname");
+  if(name) gymEdit.name = name.value;
+  root.querySelectorAll(".exrow input[type=text]").forEach((inp,i)=>{
+    if(gymEdit.exercises[i]) gymEdit.exercises[i].name = inp.value;
+  });
+}
+function renderGymEdit(root){
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = '<h2>'+(gymEdit.id ? "Muokkaa pohjaa" : "Uusi pohja")+'</h2>'
+    + '<div class="field"><label>Pohjan nimi</label><input type="text" id="tplname" placeholder="esim. Koko kroppa" value="'+esc(gymEdit.name)+'"></div>'
+    + '<div class="field"><label>Liikkeet ja sarjamäärät</label><div id="exlist"></div></div>';
+  const list = card.querySelector("#exlist");
+  gymEdit.exercises.forEach((ex,i)=>{
+    const row = document.createElement("div");
+    row.className = "exrow";
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.placeholder = "Liikkeen nimi";
+    inp.value = ex.name;
+    inp.addEventListener("input", ()=>{ ex.name = inp.value; });
+    const step = document.createElement("div");
+    step.className = "stepper";
+    const minus = document.createElement("button"); minus.textContent = "−";
+    const num = document.createElement("span"); num.textContent = ex.sets;
+    const plus = document.createElement("button"); plus.textContent = "+";
+    minus.addEventListener("click", ()=>{ if(ex.sets>1){ ex.sets--; num.textContent = ex.sets; } });
+    plus.addEventListener("click", ()=>{ if(ex.sets<10){ ex.sets++; num.textContent = ex.sets; } });
+    step.appendChild(minus); step.appendChild(num); step.appendChild(plus);
+    const del = document.createElement("button");
+    del.className = "exdel"; del.textContent = "✕";
+    del.setAttribute("aria-label","Poista liike");
+    del.addEventListener("click", ()=>{ syncGymEditFromDOM(root); gymEdit.exercises.splice(i,1); renderGym(); });
+    row.appendChild(inp); row.appendChild(step); row.appendChild(del);
+    list.appendChild(row);
+  });
+  const addEx = document.createElement("button");
+  addEx.className = "addset";
+  addEx.textContent = "+ Lisää liike";
+  addEx.addEventListener("click", ()=>{ syncGymEditFromDOM(root); gymEdit.exercises.push({name:"", sets:3, note:""}); renderGym(); });
+  card.appendChild(addEx);
+  const actions = document.createElement("div");
+  actions.className = "dlgactions";
+  if(gymEdit.id){
+    const delT = document.createElement("button");
+    delT.className = "btn danger";
+    delT.textContent = "Poista";
+    delT.addEventListener("click", ()=>{
+      if(confirm("Poistetaanko pohja \""+gymEdit.name+"\"? Historia säilyy.")){
+        data.templates = data.templates.filter(t=>t.id!==gymEdit.id);
+        gymEdit = null; save(); renderGym();
+      }
+    });
+    actions.appendChild(delT);
+  }
+  const cancel = document.createElement("button");
+  cancel.className = "btn ghost"; cancel.textContent = "Peruuta";
+  cancel.addEventListener("click", ()=>{ gymEdit = null; renderGym(); });
+  const saveB = document.createElement("button");
+  saveB.className = "btn"; saveB.textContent = "Tallenna";
+  saveB.addEventListener("click", ()=>{
+    syncGymEditFromDOM(root);
+    gymEdit.name = gymEdit.name.trim();
+    gymEdit.exercises = gymEdit.exercises.filter(e=>e.name.trim()!=="");
+    if(!gymEdit.name || !gymEdit.exercises.length){ alert("Anna pohjalle nimi ja vähintään yksi liike."); return; }
+    if(gymEdit.id){
+      const i = data.templates.findIndex(t=>t.id===gymEdit.id);
+      if(i>=0) data.templates[i] = gymEdit;
+    }else{
+      gymEdit.id = uid();
+      data.templates.push(gymEdit);
+    }
+    gymEdit = null; save(); renderGym();
+  });
+  actions.appendChild(cancel); actions.appendChild(saveB);
+  card.appendChild(actions);
+  root.appendChild(card);
+}
+function startGym(t){
+  data.activeGym = {
+    id: uid(), date: todayISO(), templateId: t.id, name: t.name,
+    exercises: t.exercises.map(e=>({ name:e.name, note:e.note||"", sets: Array.from({length:e.sets}, ()=>({kg:"", reps:"", done:false})) }))
+  };
+  save(); renderGym();
+}
+function renderGymActive(root){
+  const ag = data.activeGym;
+  const head = document.createElement("div");
+  head.className = "card";
+  head.innerHTML = '<div class="gymtitle"><h2 style="margin:0">'+esc(ag.name)+' · '+fmtShort(parseISO(ag.date))+'</h2></div>'
+    + '<p class="muted" style="margin:0">Kirjaa kg ja toistot, kuittaa sarja ✓:llä. Tyhjä sarja täyttyy kuitatessa edellisen kerran luvuilla. Kesken oleva treeni säilyy muistissa, vaikka sulkisit apin.</p>';
+  root.appendChild(head);
+
+  ag.exercises.forEach(ex=>{
+    const card = document.createElement("div");
+    card.className = "card excard";
+    const title = document.createElement("div");
+    title.className = "exname";
+    title.textContent = ex.name;
+    card.appendChild(title);
+    const prev = lastPerformance(ex.name);
+    const note = document.createElement("textarea");
+    note.className = "exnote";
+    note.rows = 1;
+    note.placeholder = "Muistiinpano (näkyy myös ens kerralla)";
+    note.value = ex.note || "";
+    note.addEventListener("input", ()=>{ ex.note = note.value; save(); });
+    card.appendChild(note);
+    const headRow = document.createElement("div");
+    headRow.className = "sethead";
+    headRow.innerHTML = "<span>#</span><span>Viimeksi</span><span>kg</span><span>toistot</span><span></span>";
+    card.appendChild(headRow);
+    ex.sets.forEach((s,si)=>{
+      const row = document.createElement("div");
+      row.className = "setrow" + (s.done ? " done" : "");
+      const pset = prev ? (prev.sets[si] || prev.sets[prev.sets.length-1]) : null;
+      const ptxt = pset ? fmtKgNum(pset.kg)+" kg × "+pset.reps : "–";
+      row.innerHTML = '<span class="snum">'+(si+1)+'</span><span class="sprev">'+ptxt+'</span>';
+      const kgI = document.createElement("input");
+      kgI.inputMode = "decimal"; kgI.value = s.kg;
+      kgI.addEventListener("input", ()=>{ s.kg = kgI.value; save(); });
+      const repI = document.createElement("input");
+      repI.inputMode = "numeric"; repI.value = s.reps;
+      repI.addEventListener("input", ()=>{ s.reps = repI.value; save(); });
+      const doneB = document.createElement("button");
+      doneB.className = "sdone";
+      doneB.textContent = s.done ? "✓" : "";
+      doneB.setAttribute("aria-label","Kuittaa sarja");
+      doneB.addEventListener("click", ()=>{
+        if(!s.done && s.kg==="" && s.reps==="" && pset){ s.kg = String(pset.kg).replace(".",","); s.reps = String(pset.reps); }
+        s.done = !s.done; save(); renderGym();
+      });
+      row.appendChild(kgI); row.appendChild(repI); row.appendChild(doneB);
+      card.appendChild(row);
+    });
+    const addS = document.createElement("button");
+    addS.className = "addset";
+    addS.textContent = "+ Lisää sarja";
+    addS.addEventListener("click", ()=>{ ex.sets.push({kg:"", reps:"", done:false}); save(); renderGym(); });
+    card.appendChild(addS);
+    root.appendChild(card);
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "dlgactions";
+  actions.style.marginBottom = "14px";
+  const discard = document.createElement("button");
+  discard.className = "btn danger";
+  discard.textContent = "Hylkää";
+  discard.addEventListener("click", ()=>{
+    if(confirm("Hylätäänkö treeni? Kirjaukset katoavat.")){ data.activeGym = null; save(); renderGym(); }
+  });
+  const finish = document.createElement("button");
+  finish.className = "btn";
+  finish.textContent = "Treeni valmis ✓";
+  finish.addEventListener("click", finishGym);
+  actions.appendChild(discard); actions.appendChild(finish);
+  root.appendChild(actions);
+}
+function finishGym(){
+  const ag = data.activeGym;
+  const exercises = ag.exercises.map(ex=>({
+    name: ex.name, note: ex.note||"",
+    sets: ex.sets.filter(s=>s.done).map(s=>({ kg: parseKg(s.kg)!==null ? parseKg(s.kg) : 0, reps: parseInt(String(s.reps).trim(),10)||0 })).filter(s=>s.reps>0)
+  })).filter(ex=>ex.sets.length);
+  if(!exercises.length){ alert("Kuittaa vähintään yksi sarja ✓ ja anna toistot ennen valmistumista."); return; }
+  if(!confirm("Merkitäänkö treeni valmiiksi?")) return;
+  data.gymlog.push({ id: ag.id, date: ag.date, templateId: ag.templateId, name: ag.name, exercises });
+  data.gymlog.sort((a,b)=>a.date<b.date?-1:1);
+  const tpl = data.templates.find(t=>t.id===ag.templateId);
+  if(tpl){
+    tpl.exercises.forEach(te=>{
+      const src = ag.exercises.find(e=>e.name.trim().toLowerCase()===te.name.trim().toLowerCase());
+      if(src) te.note = src.note||"";
+    });
+  }
+  data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true });
+  data.activeGym = null;
+  save(); renderWeek(); renderGym();
+  alert("Treeni tallennettu 💪 Lihaskunto kuitattu viikkonäkymään.");
+}
+
 /* ---------- More / backup ---------- */
 function renderMore(){
   document.getElementById("datainfo").textContent =
-    "Treenejä kirjattu: " + data.workouts.length + " kpl · Painokirjauksia: " + data.weights.length + " kpl.";
+    "Treenejä kirjattu: " + data.workouts.length + " kpl · Painokirjauksia: " + data.weights.length + " kpl · Salitreenejä: " + data.gymlog.length + " kpl.";
 }
 document.getElementById("exportbtn").addEventListener("click", ()=>{
   const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
@@ -827,7 +1130,17 @@ document.getElementById("importfile").addEventListener("change", e=>{
         d.weights.forEach(w=>byDate.set(w.date,w));
         data.weights = [...byDate.values()].sort((a,b)=>a.date<b.date?-1:1);
         if(d.goal) data.goal = d.goal;
-        save(); renderWeek(); renderWeight(); renderMore();
+        if(Array.isArray(d.templates)){
+          const bt = new Map(data.templates.map(t=>[t.id,t]));
+          d.templates.forEach(t=>bt.set(t.id,t));
+          data.templates = [...bt.values()];
+        }
+        if(Array.isArray(d.gymlog)){
+          const bg = new Map(data.gymlog.map(g=>[g.id,g]));
+          d.gymlog.forEach(g=>bg.set(g.id,g));
+          data.gymlog = [...bg.values()].sort((a,b)=>a.date<b.date?-1:1);
+        }
+        save(); renderWeek(); renderWeight(); renderGym(); renderMore();
         alert("Tiedot tuotu ja yhdistetty.");
       }
     }catch(err){
@@ -841,6 +1154,7 @@ document.getElementById("importfile").addEventListener("change", e=>{
 /* ---------- Init ---------- */
 renderWeek();
 renderWeight();
+renderGym();
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(e=>console.warn("SW-rekisteröinti epäonnistui", e));
 }
