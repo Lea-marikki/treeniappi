@@ -112,6 +112,11 @@
   .wcard .cico{
     width:36px; height:36px; min-width:36px; border-radius:12px; display:flex;
     align-items:center; justify-content:center; font-size:18px;
+    cursor:grab; touch-action:none;
+  }
+  .day.droptarget{
+    background:var(--accent-soft); border-radius:var(--radius);
+    outline:2px dashed var(--accent); outline-offset:3px;
   }
   .wcard .info{flex:1; min-width:0; cursor:pointer}
   .wcard .t{font-weight:700; font-size:15px}
@@ -476,6 +481,7 @@ function renderWeek(){
 
     const day = document.createElement("div");
     day.className = "day";
+    day.dataset.date = dISO;
     const head = document.createElement("div");
     head.className = "dayhead" + (isToday?" today":"");
     head.innerHTML = '<span class="dname">'+DAYNAMES[i]+'</span><span class="ddate">'+fmtShort(d)+'</span>'
@@ -499,6 +505,8 @@ function renderWeek(){
       ico.className = "cico";
       ico.style.background = cat.soft;
       ico.textContent = cat.emoji;
+      ico.setAttribute("aria-label","Siirrä treeni raahaamalla");
+      initCardDrag(ico, card, w);
 
       const info = document.createElement("div");
       info.className = "info";
@@ -531,6 +539,62 @@ function renderWeek(){
 }
 function esc(s){
   return String(s).replace(/[&<>"']/g, ch=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
+}
+
+/* ---------- Treenin siirto raahaamalla ---------- */
+function moveWorkout(w, newDate){
+  if(!newDate || newDate===w.date) return;
+  w.date = newDate;
+  save(); renderWeek();
+}
+function initCardDrag(handle, card, w){
+  handle.addEventListener("pointerdown", e=>{
+    e.preventDefault();
+    let ghost = null, over = null;
+    const r = card.getBoundingClientRect();
+    const offX = e.clientX - r.left, offY = e.clientY - r.top;
+    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+    function ensureGhost(){
+      if(ghost) return;
+      ghost = card.cloneNode(true);
+      ghost.style.cssText = "position:fixed; width:"+r.width+"px; z-index:99; pointer-events:none; opacity:.95; margin:0; transform:rotate(1.5deg) scale(1.02); box-shadow:0 12px 30px rgba(80,60,110,.3); background:#fff;";
+      document.body.appendChild(ghost);
+      card.style.opacity = ".35";
+    }
+    function onMove(ev){
+      if(!ghost && Math.abs(ev.clientX-(r.left+offX))<6 && Math.abs(ev.clientY-(r.top+offY))<6) return;
+      ensureGhost();
+      ghost.style.left = (ev.clientX-offX)+"px";
+      ghost.style.top = (ev.clientY-offY)+"px";
+      if(ev.clientY < 110) window.scrollBy(0,-14);
+      else if(ev.clientY > window.innerHeight-110) window.scrollBy(0,14);
+      ghost.style.display = "none";
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      ghost.style.display = "";
+      const day = el ? el.closest(".day") : null;
+      if(over && over!==day) over.classList.remove("droptarget");
+      over = day;
+      if(day) day.classList.add("droptarget");
+    }
+    function onUp(){
+      const target = over, dragged = !!ghost;
+      cleanup();
+      if(dragged && target) moveWorkout(w, target.dataset.date);
+      else if(dragged) renderWeek();
+    }
+    function onCancel(){ cleanup(); renderWeek(); }
+    function cleanup(){
+      if(ghost) ghost.remove();
+      if(over) over.classList.remove("droptarget");
+      card.style.opacity = "";
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", onUp);
+      handle.removeEventListener("pointercancel", onCancel);
+    }
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", onUp);
+    handle.addEventListener("pointercancel", onCancel);
+  });
 }
 
 /* ---------- Workout dialog ---------- */
