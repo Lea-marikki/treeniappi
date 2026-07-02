@@ -112,7 +112,11 @@
   .wcard .cico{
     width:36px; height:36px; min-width:36px; border-radius:12px; display:flex;
     align-items:center; justify-content:center; font-size:18px;
-    cursor:grab; touch-action:none;
+  }
+  .wcard .draghandle{
+    display:flex; align-items:center; align-self:stretch;
+    padding:11px 8px 11px 13px; margin:-11px -8px -11px -13px;
+    touch-action:none; cursor:grab;
   }
   .day.droptarget{
     background:var(--accent-soft); border-radius:var(--radius);
@@ -505,8 +509,11 @@ function renderWeek(){
       ico.className = "cico";
       ico.style.background = cat.soft;
       ico.textContent = cat.emoji;
-      ico.setAttribute("aria-label","Siirrä treeni raahaamalla");
-      initCardDrag(ico, card, w);
+      const handle = document.createElement("div");
+      handle.className = "draghandle";
+      handle.setAttribute("aria-label","Siirrä treeni raahaamalla");
+      handle.appendChild(ico);
+      initCardDrag(handle, card, w);
 
       const info = document.createElement("div");
       info.className = "info";
@@ -521,7 +528,7 @@ function renderWeek(){
       chk.textContent = w.done ? "✓" : "";
       chk.addEventListener("click", ()=>{ w.done = !w.done; save(); renderWeek(); });
 
-      card.appendChild(ico);
+      card.appendChild(handle);
       card.appendChild(info);
       card.appendChild(chk);
       day.appendChild(card);
