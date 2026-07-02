@@ -80,7 +80,13 @@
 
   /* Day blocks */
   .day{margin-bottom:16px}
-  .dayhead{display:flex; align-items:baseline; gap:8px; margin-bottom:7px; padding:0 4px}
+  .dayhead{display:flex; align-items:center; gap:8px; margin-bottom:7px; padding:0 4px}
+  .dayadd{
+    margin-left:auto; width:28px; height:28px; min-width:28px; border-radius:50%;
+    border:none; background:var(--accent-soft); color:var(--accent);
+    font-size:17px; line-height:1; cursor:pointer; font-family:inherit; font-weight:700;
+  }
+  .dayadd:active{background:var(--accent); color:#fff}
   .dayhead .dname{font-weight:800; font-size:14.5px}
   .dayhead .ddate{color:var(--muted); font-size:13px}
   .dayhead.today .dname{color:var(--accent)}
@@ -109,13 +115,8 @@
   .wcard.done .t{text-decoration:line-through; color:var(--muted)}
   .wcard .c{font-size:12.5px; color:var(--muted)}
   .wcard .missedtag{color:var(--red); font-size:12px; font-weight:700}
-  .addbtn{
-    width:100%; border:1.5px dashed #e3d9ce; background:none; border-radius:var(--radius);
-    padding:10px; color:var(--muted); font-size:13.5px; cursor:pointer; font-family:inherit;
-  }
-  .addbtn:active{background:var(--accent-soft)}
   .restday{
-    text-align:center; color:var(--muted); font-size:13px; padding:2px 0 6px;
+    color:var(--muted); font-size:13px; padding:1px 4px 4px;
   }
 
   /* Cards & weight view */
@@ -307,7 +308,7 @@
 const STORE_KEY = "treeniappi_v1";
 const CATS = {
   intervalli:     { name:"Intervalli",     hint:"pyörä/hölkkä 30 min",   emoji:"⚡", hex:"#ff7f6e", soft:"#fff1ee", target:1 },
-  lihaskunto:     { name:"Lihaskunto",     hint:"sali/ryhmäliikunta",    emoji:"💪", hex:"#8b7ff0", soft:"#f1eefe", target:1 },
+  lihaskunto:     { name:"Lihaskunto",     hint:"sali/ryhmäliikunta",    emoji:"💪", hex:"#8b7ff0", soft:"#f1eefe", target:2 },
   liikkuvuus:     { name:"Liikkuvuus",     hint:"jooga, pilates tms.",   emoji:"🧘", hex:"#3ec6a8", soft:"#e9faf5", target:1 },
   peruskestavyys: { name:"Peruskestävyys", hint:"40–60 min",             emoji:"🚶", hex:"#4aa8e8", soft:"#ecf5fd", target:1 }
 };
@@ -436,9 +437,16 @@ function renderWeek(){
     head.className = "dayhead" + (isToday?" today":"");
     head.innerHTML = '<span class="dname">'+DAYNAMES[i]+'</span><span class="ddate">'+fmtShort(d)+'</span>'
       + (isToday?'<span class="todaytag">tänään</span>':"");
+    const add = document.createElement("button");
+    add.className = "dayadd";
+    add.textContent = "+";
+    add.setAttribute("aria-label","Lisää treeni: "+DAYNAMES[i]);
+    add.addEventListener("click", ()=>openDialog(dISO, null));
+    head.appendChild(add);
     day.appendChild(head);
 
-    workoutsOn(dISO).forEach(w=>{
+    const dayWorkouts = workoutsOn(dISO);
+    dayWorkouts.forEach(w=>{
       const missed = !w.done && dISO < tISO;
       const cat = CATS[w.cat] || {name:w.cat, emoji:"🏃", hex:"#999", soft:"#eee"};
       const card = document.createElement("div");
@@ -468,11 +476,12 @@ function renderWeek(){
       day.appendChild(card);
     });
 
-    const add = document.createElement("button");
-    add.className = "addbtn";
-    add.textContent = "+ Lisää treeni";
-    add.addEventListener("click", ()=>openDialog(dISO, null));
-    day.appendChild(add);
+    if(dayWorkouts.length===0){
+      const rest = document.createElement("div");
+      rest.className = "restday";
+      rest.textContent = "Lepopäivä";
+      day.appendChild(rest);
+    }
 
     daysEl.appendChild(day);
   }
