@@ -266,7 +266,9 @@
   .calgrid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
   .calgrid.h{margin:10px 0 5px}
   .calgrid.h span{text-align:center; font-size:10.5px; color:var(--muted); font-weight:700}
-  .calday{aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:600; background:var(--bg); color:var(--muted)}
+  .calday{aspect-ratio:1; min-height:42px; border:none; padding:0; font-family:inherit; touch-action:manipulation; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:600; background:var(--bg); color:var(--muted)}
+  .calday:disabled{opacity:.45; cursor:default}
+  .calday.click:active{transform:scale(.92)}
   .calday.ok{background:var(--green); color:#fff; font-weight:700}
   .calday.over{background:var(--red-soft); color:var(--red); font-weight:700}
   .calday.today{outline:2px solid var(--accent); outline-offset:1px}
@@ -277,6 +279,8 @@
   .callegend .lok::before{background:var(--green)}
   .callegend .lover::before{background:var(--red-soft); border:1px solid var(--red)}
   .callegend .lnone::before{background:var(--bg); border:1px solid var(--line)}
+  .calday.est{background:var(--red-soft); color:var(--red); border:1.5px dashed var(--red)}
+  .callegend .lest::before{background:var(--red-soft); border:1px dashed var(--red)}
   .mdaterow{margin-top:10px; display:flex; align-items:center; gap:10px}
   .mdaterow #mdate{display:none; flex:1; border:1.5px solid var(--line); border-radius:10px; padding:7px; font-family:inherit; font-size:14px; background:#fffdfb; color:var(--text)}
   .mdaterow.open #mdate{display:block}
@@ -375,7 +379,7 @@
       </div>
       <div class="calgrid h" id="calhead"></div>
       <div class="calgrid" id="calgrid"></div>
-      <div class="callegend"><span class="lok">tavoitteessa</span><span class="lover">yli tavoitteen</span><span class="lnone">ei kirjauksia</span></div>
+      <div class="callegend"><span class="lok">tavoitteessa</span><span class="lover">yli tavoitteen</span><span class="lest">arviopäivä</span><span class="lnone">ei kirjauksia</span></div>
       <p class="muted" id="calsummary" style="margin:10px 0 0"></p>
     </div>
     <div class="card" id="rulecard"></div>
@@ -402,8 +406,10 @@
       <p class="muted">Päivä lasketaan onnistuneeksi, kun kirjatut kalorit pysyvät tässä rajassa.</p>
       <div class="goalform" style="margin-top:6px">
         <div class="gf"><label>kcal / päivä</label><input type="text" inputmode="numeric" id="kcalgoalinput"></div>
+        <div class="gf"><label>tyhjä päivä (arvio)</label><input type="text" inputmode="numeric" id="estinput"></div>
         <button class="btn" id="kcalgoalsave">Tallenna</button>
       </div>
+      <p class="muted" style="margin:8px 0 0">Menneet päivät ilman kirjauksia lasketaan seurannassa ja keskiarvoissa arviolla — yleensä ne ovat ulkona syötyjä päiviä.</p>
     </div>
     <div class="card">
       <h2>Tietoa</h2>
@@ -470,6 +476,7 @@ function load(){
         if(!("activeGym" in d)) d.activeGym = null;
         if(!Array.isArray(d.meals)) d.meals = [];
         if(typeof d.kcalGoal !== "number") d.kcalGoal = 1700;
+        if(typeof d.emptyEstimate !== "number") d.emptyEstimate = 2500;
         if(!d.targets || typeof d.targets !== "object") d.targets = {};
         Object.keys(CATS).forEach(k=>{ if(typeof d.targets[k] !== "number") d.targets[k] = CATS[k].target; });
         return d;
@@ -478,7 +485,7 @@ function load(){
   }catch(e){ console.warn("Load failed", e); }
   const targets = {};
   Object.keys(CATS).forEach(k=>{ targets[k] = CATS[k].target; });
-  return { workouts: [], weights: [], goal: null, templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, targets };
+  return { workouts: [], weights: [], goal: null, templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, emptyEstimate: 2500, targets };
 }
 function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -1285,6 +1292,15 @@ function kcalTotals(){
   data.meals.forEach(m=>{ t[m.date] = (t[m.date]||0) + m.kcal; });
   return t;
 }
+function firstMealDate(){
+  return data.meals.length ? data.meals.map(m=>m.date).sort()[0] : null;
+}
+function dayInfo(iso, totals, first){
+  const tot = totals[iso];
+  if(tot !== undefined) return { tot: tot, est: false };
+  if(first && iso >= first && iso < todayISO()) return { tot: data.emptyEstimate, est: true };
+  return null;
+}
 function kcalStreak(){
   const totals = kcalTotals(), goal = data.kcalGoal;
   let streak = 0;
@@ -1357,7 +1373,11 @@ function renderDayCard(){
     + '<span class="muted">tavoite '+goal+' kcal'+(over ? " · "+(total-goal)+" yli" : " · "+(goal-total)+" jäljellä")+'</span></div>'
     + '<div class="kcalbar'+(over?" over":"")+'"><div class="kfill" style="width:'+Math.min(100, goal>0 ? total/goal*100 : 0)+'%"></div></div>';
   if(!meals.length){
-    el.innerHTML += '<div class="empty-note">Ei kirjauksia tälle päivälle vielä.</div>';
+    const fm = firstMealDate();
+    const isEst = fm && iso >= fm && iso < todayISO();
+    el.innerHTML += '<div class="empty-note">'+(isEst
+      ? "Ei kirjauksia — 80/20-seurannassa päivä lasketaan arviolla "+data.emptyEstimate+" kcal. Voit myös kirjata ateriat jälkikäteen."
+      : "Ei kirjauksia tälle päivälle vielä.")+'</div>';
     return;
   }
   const ul = document.createElement("ul");
@@ -1420,40 +1440,47 @@ function renderCalendar(){
     b.className = "calday blank";
     grid.appendChild(b);
   }
-  let okDays = 0, loggedDays = 0;
+  const first = firstMealDate();
+  let okDays = 0, loggedDays = 0, estDays = 0;
   for(let day=1;day<=dim;day++){
     const iso = fmtISO(new Date(y,m,day));
-    const tot = totals[iso];
-    const cell = document.createElement("div");
+    const d = dayInfo(iso, totals, first);
+    const tot = d ? d.tot : undefined;
+    const cell = document.createElement("button");
+    cell.type = "button";
     let cls = "calday";
-    if(tot === undefined){ if(iso > tISO) cls += " future"; }
+    if(!d){ if(iso > tISO) cls += " future"; }
+    else if(d.est){ cls += " est"; estDays++; }
     else if(tot <= goal){ cls += " ok"; okDays++; loggedDays++; }
     else { cls += " over"; loggedDays++; }
     if(iso === tISO) cls += " today";
     if(iso <= tISO) cls += " click";
     cell.className = cls;
     cell.textContent = day;
-    if(tot !== undefined) cell.title = tot+" kcal";
+    if(d) cell.title = d.est ? "~"+tot+" kcal (arvio)" : tot+" kcal";
     if(iso <= tISO){
+      cell.setAttribute("aria-label", day+"."+(m+1)+". — näytä päivän kirjaukset");
       cell.addEventListener("click", ()=>{
         document.getElementById("mdate").value = iso;
         renderFood();
         const dc = document.getElementById("daycard");
         if(dc.scrollIntoView) dc.scrollIntoView({behavior:"smooth", block:"start"});
       });
+    }else{
+      cell.disabled = true;
     }
     grid.appendChild(cell);
   }
-  document.getElementById("calsummary").textContent = loggedDays
-    ? okDays+"/"+loggedDays+" kirjatusta päivästä tavoitteessa."
+  document.getElementById("calsummary").textContent = (loggedDays || estDays)
+    ? okDays+"/"+loggedDays+" kirjatusta päivästä tavoitteessa"+(estDays ? " · "+estDays+" arviopäivää" : "")+"."
     : "Ei kirjauksia tässä kuussa vielä.";
 }
 function avgKcal(days){
-  const totals = kcalTotals();
+  const totals = kcalTotals(), first = firstMealDate();
   let sum = 0, n = 0;
-  for(let i=0;i<days;i++){
-    const tot = totals[fmtISO(addDays(new Date(), -i))];
-    if(tot !== undefined){ sum += tot; n++; }
+  for(let i=1;i<=days;i++){
+    const d = dayInfo(fmtISO(addDays(new Date(), -i)), totals, first);
+    if(d){ sum += d.tot; n++; }
   }
   return n ? { avg: Math.round(sum/n), n } : null;
 }
@@ -1468,41 +1495,44 @@ function ruleBar(label, pct, target, higherBetter){
 }
 function renderRule(){
   const el = document.getElementById("rulecard");
-  const goal = data.kcalGoal, totals = kcalTotals();
-  let ok=0, logged=0, overSum=0, overDays=0, treatKcal=0, allKcal=0;
-  for(let i=0;i<30;i++){
-    const tot = totals[fmtISO(addDays(new Date(), -i))];
-    if(tot === undefined) continue;
-    logged++;
-    allKcal += tot;
-    if(tot <= goal) ok++;
-    else { overDays++; overSum += tot-goal; }
+  const goal = data.kcalGoal, totals = kcalTotals(), first = firstMealDate();
+  let ok=0, counted=0, estDays=0, overSum=0, overDays=0, treatKcal=0, allKcal=0;
+  for(let i=1;i<=30;i++){
+    const d = dayInfo(fmtISO(addDays(new Date(), -i)), totals, first);
+    if(!d) continue;
+    counted++;
+    if(d.est) estDays++;
+    allKcal += d.tot;
+    if(d.tot <= goal) ok++;
+    else { overDays++; overSum += d.tot-goal; }
   }
   const today = parseISO(todayISO());
   data.meals.forEach(m=>{
     const diff = (today - parseISO(m.date))/(24*3600*1000);
-    if(m.treat && diff>=0 && diff<30) treatKcal += m.kcal;
+    if(m.treat && diff>=1 && diff<=30) treatKcal += m.kcal;
   });
   let html = '<h2>80/20-seuranta · 30 pv ⚖️</h2>';
-  if(!logged){
-    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on. 80 % päivistä tavoitteessa riittää — jousto on osa suunnitelmaa.</div>';
+  if(!counted){
+    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on — kuluva päivä lasketaan mukaan vasta täytenä eli huomenna.</div>';
     return;
   }
-  const okPct = Math.round(ok/logged*100);
+  const okPct = Math.round(ok/counted*100);
   const treatPct = allKcal ? Math.round(treatKcal/allKcal*100) : 0;
   html += ruleBar("Päivät tavoitteessa", okPct, 80, true)
     + ruleBar("Herkkujen osuus kaloreista", treatPct, 20, false)
     + '<p class="muted" style="margin:10px 0 0">'
-    + (overDays ? "Ylityspäiviä "+overDays+" kpl ("+logged+" kirjatusta), keskimäärin +"+Math.round(overSum/overDays)+" kcal ylitys. " : "Ei yhtään ylityspäivää. 🎉 ")
+    + (overDays ? "Ylityspäiviä "+overDays+"/"+counted+", keskimäärin +"+Math.round(overSum/overDays)+" kcal ylitys. " : "Ei yhtään ylityspäivää. 🎉 ")
+    + (estDays ? estDays+" päivää ilman kirjauksia laskettu arviolla "+data.emptyEstimate+" kcal. " : "")
     + (okPct>=80 ? "80/20 toteutuu — juuri sopivasti joustoa!" : "80/20-malliin riittää, että 8 päivää kymmenestä osuu tavoitteeseen — täydellisyyttä ei tavoitella.")
     + '</p>';
   const a7 = avgKcal(7), a30 = avgKcal(30);
   if(a7 || a30){
     html += '<div class="stats" style="margin:12px 0 0">';
-    if(a7) html += '<div class="stat"><div class="v">'+a7.avg+'</div><div class="l">ka 7 pv · '+a7.n+' kirjattua</div></div>';
-    if(a30) html += '<div class="stat"><div class="v">'+a30.avg+'</div><div class="l">ka 30 pv · '+a30.n+' kirjattua</div></div>';
+    if(a7) html += '<div class="stat"><div class="v">'+a7.avg+'</div><div class="l">ka 7 pv · '+a7.n+' päivää</div></div>';
+    if(a30) html += '<div class="stat"><div class="v">'+a30.avg+'</div><div class="l">ka 30 pv · '+a30.n+' päivää</div></div>';
     html += '</div>';
   }
+  html += '<p class="muted" style="margin:8px 0 0">Kuluva päivä ei ole mukana luvuissa — se lasketaan vasta täytenä.</p>';
   el.innerHTML = html;
 }
 
@@ -1529,12 +1559,17 @@ function renderMore(){
     tl.appendChild(row);
   });
   document.getElementById("kcalgoalinput").value = data.kcalGoal;
+  document.getElementById("estinput").value = data.emptyEstimate;
 }
 document.getElementById("kcalgoalsave").addEventListener("click", ()=>{
   const el = document.getElementById("kcalgoalinput");
   const v = parseInt(String(el.value).trim(), 10);
   if(!isFinite(v) || v<500 || v>6000){ alert("Anna kaloritavoite väliltä 500–6000 kcal."); el.focus(); return; }
+  const eEl = document.getElementById("estinput");
+  const ev = parseInt(String(eEl.value).trim(), 10);
+  if(!isFinite(ev) || ev<500 || ev>8000){ alert("Anna tyhjän päivän arvio väliltä 500–8000 kcal."); eEl.focus(); return; }
   data.kcalGoal = v;
+  data.emptyEstimate = ev;
   save(); renderMore(); renderFood();
 });
 document.getElementById("exportbtn").addEventListener("click", ()=>{
