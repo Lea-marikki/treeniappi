@@ -282,8 +282,8 @@
   .calday.est{background:var(--red-soft); color:var(--red); border:1.5px dashed var(--red)}
   .callegend .lest::before{background:var(--red-soft); border:1px dashed var(--red)}
   .mdaterow{margin-top:10px; display:flex; align-items:center; gap:10px}
-  .mdaterow #mdate{display:none; flex:1; border:1.5px solid var(--line); border-radius:10px; padding:7px; font-family:inherit; font-size:14px; background:#fffdfb; color:var(--text)}
-  .mdaterow.open #mdate{display:block}
+  .mdaterow input[type=date]{display:none; flex:1; border:1.5px solid var(--line); border-radius:10px; padding:7px; font-family:inherit; font-size:14px; background:#fffdfb; color:var(--text)}
+  .mdaterow.open input[type=date]{display:block}
   .treatbtn{font-size:17px; padding:10px 13px}
   .treatbtn.on{background:var(--red-soft); outline:2px solid var(--red)}
   .calday.click{cursor:pointer}
@@ -330,11 +330,14 @@
   <!-- PAINO -->
   <section id="view-weight" class="view">
     <div class="card">
-      <h2>Kirjaa aamupaino ☀️</h2>
+      <h2 id="wformtitle">Kirjaa aamupaino ☀️</h2>
       <div class="wform">
-        <input type="date" id="wdate">
         <input type="text" id="wkg" inputmode="decimal" autocomplete="off" placeholder="kg">
         <button class="btn" id="wsave">Tallenna</button>
+      </div>
+      <div class="mdaterow" id="wdaterow">
+        <button class="editlink" id="wdatelink">📅 Kirjaa toiselle päivälle</button>
+        <input type="date" id="wdate">
       </div>
     </div>
     <div class="card" id="goalcard"></div>
@@ -803,6 +806,10 @@ document.getElementById("wsave").addEventListener("click", ()=>{
   kgEl.value = "";
   renderWeight();
 });
+document.getElementById("wdatelink").addEventListener("click", ()=>{
+  document.getElementById("wdaterow").classList.toggle("open");
+});
+document.getElementById("wdate").addEventListener("change", renderWeight);
 
 function renderGoalCard(ws, trend){
   const el = document.getElementById("goalcard");
@@ -868,6 +875,8 @@ function renderGoalCard(ws, trend){
 function renderWeight(){
   const dateEl = document.getElementById("wdate");
   if(!dateEl.value) dateEl.value = todayISO();
+  document.getElementById("wformtitle").textContent =
+    dateEl.value===todayISO() ? "Kirjaa aamupaino ☀️" : "Kirjaa paino · "+fmtShort(parseISO(dateEl.value));
 
   const ws = data.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
   const trend = trendSeries(ws);
@@ -1304,11 +1313,6 @@ function dayInfo(iso, totals, first){
 function kcalStreak(){
   const totals = kcalTotals(), goal = data.kcalGoal;
   let streak = 0;
-  const tISO = todayISO();
-  if(totals[tISO] !== undefined){
-    if(totals[tISO] > goal) return 0;
-    streak++;
-  }
   let d = addDays(new Date(), -1);
   while(true){
     const tot = totals[fmtISO(d)];
@@ -1326,7 +1330,7 @@ document.getElementById("mtreat").addEventListener("click", ()=>{
   b.setAttribute("aria-pressed", mealTreat ? "true" : "false");
 });
 document.getElementById("mdatelink").addEventListener("click", ()=>{
-  document.querySelector(".mdaterow").classList.toggle("open");
+  document.getElementById("mdatelink").parentElement.classList.toggle("open");
 });
 document.getElementById("msave").addEventListener("click", ()=>{
   const date = document.getElementById("mdate").value || todayISO();
@@ -1401,27 +1405,25 @@ function renderDayCard(){
 }
 function treatFreeDays(){
   if(!data.meals.length) return null;
+  const yesterday = addDays(new Date(), -1);
   const treats = data.meals.filter(m=>m.treat);
-  const today = parseISO(todayISO());
-  if(!treats.length){
-    const first = data.meals.map(m=>m.date).sort()[0];
-    return Math.floor((today - parseISO(first))/(24*3600*1000)) + 1;
-  }
-  const last = treats.map(m=>m.date).sort().pop();
-  return Math.floor((today - parseISO(last))/(24*3600*1000));
+  const from = treats.length
+    ? addDays(parseISO(treats.map(m=>m.date).sort().pop()), 1)
+    : parseISO(data.meals.map(m=>m.date).sort()[0]);
+  return Math.max(0, Math.floor((yesterday - from)/(24*3600*1000)) + 1);
 }
 function renderStreak(){
   const el = document.getElementById("streakcard");
   const s = kcalStreak();
   let html = '<div class="streak"><div class="fire">'+(s>0?"🔥":"🌱")+'</div><div>'
     + '<div class="snum">'+(s>0 ? s+(s===1?" päivä":" päivää")+" putkeen tavoitteessa" : "Kaloriputki alkamassa")+'</div>'
-    + '<div class="stxt">'+(s>0 ? "Hienoa, jatka samaan malliin! 💛" : "Putki alkaa ensimmäisestä päivästä, jona kirjatut kalorit pysyvät tavoitteessa.")+'</div>'
+    + '<div class="stxt">'+(s>0 ? "Hienoa, jatka samaan malliin! 💛" : "Putki alkaa ensimmäisestä täydestä päivästä tavoitteessa.")+'</div>'
     + '</div></div>';
   const t = treatFreeDays();
   if(t !== null){
     html += '<div class="streak" style="margin-top:12px"><div class="fire">'+(t>0?"🍃":"🍬")+'</div><div>'
       + '<div class="snum">'+(t>0 ? t+(t===1?" päivä":" päivää")+" ilman herkkuja" : "Herkuton putki alkamassa")+'</div>'
-      + '<div class="stxt">'+(t>0 ? "Sokerikoukku hellittää päivä kerrallaan. 💪" : "Merkitse herkut 🍬-napilla kirjatessa — putki alkaa ensimmäisestä herkuttomasta päivästä.")+'</div>'
+      + '<div class="stxt">'+(t>0 ? "Sokerikoukku hellittää päivä kerrallaan. 💪" : "Merkitse herkut 🍬-napilla kirjatessa.")+'</div>'
       + '</div></div>';
   }
   el.innerHTML = html;
@@ -1513,7 +1515,7 @@ function renderRule(){
   });
   let html = '<h2>80/20-seuranta · 30 pv ⚖️</h2>';
   if(!counted){
-    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on — kuluva päivä lasketaan mukaan vasta täytenä eli huomenna.</div>';
+    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on.</div>';
     return;
   }
   const okPct = Math.round(ok/counted*100);
@@ -1523,7 +1525,7 @@ function renderRule(){
     + '<p class="muted" style="margin:10px 0 0">'
     + (overDays ? "Ylityspäiviä "+overDays+"/"+counted+", keskimäärin +"+Math.round(overSum/overDays)+" kcal ylitys. " : "Ei yhtään ylityspäivää. 🎉 ")
     + (estDays ? estDays+" päivää ilman kirjauksia laskettu arviolla "+data.emptyEstimate+" kcal. " : "")
-    + (okPct>=80 ? "80/20 toteutuu — juuri sopivasti joustoa!" : "80/20-malliin riittää, että 8 päivää kymmenestä osuu tavoitteeseen — täydellisyyttä ei tavoitella.")
+    + (okPct>=80 ? "80/20 toteutuu — juuri sopivasti joustoa!" : "8 päivää kymmenestä tavoitteessa riittää.")
     + '</p>';
   const a7 = avgKcal(7), a30 = avgKcal(30);
   if(a7 || a30){
@@ -1532,7 +1534,6 @@ function renderRule(){
     if(a30) html += '<div class="stat"><div class="v">'+a30.avg+'</div><div class="l">ka 30 pv · '+a30.n+' päivää</div></div>';
     html += '</div>';
   }
-  html += '<p class="muted" style="margin:8px 0 0">Kuluva päivä ei ole mukana luvuissa — se lasketaan vasta täytenä.</p>';
   el.innerHTML = html;
 }
 
