@@ -277,6 +277,18 @@
   .callegend .lok::before{background:var(--green)}
   .callegend .lover::before{background:var(--red-soft); border:1px solid var(--red)}
   .callegend .lnone::before{background:var(--bg); border:1px solid var(--line)}
+  .mdaterow{margin-top:10px; display:flex; align-items:center; gap:10px}
+  .mdaterow #mdate{display:none; flex:1; border:1.5px solid var(--line); border-radius:10px; padding:7px; font-family:inherit; font-size:14px; background:#fffdfb; color:var(--text)}
+  .mdaterow.open #mdate{display:block}
+  .treatbtn{font-size:17px; padding:10px 13px}
+  .treatbtn.on{background:var(--red-soft); outline:2px solid var(--red)}
+  .calday.click{cursor:pointer}
+  .rrow{margin-top:10px}
+  .rlab{display:flex; justify-content:space-between; font-size:13px; font-weight:700; margin-bottom:4px}
+  .rbar{position:relative; height:12px; background:var(--bg); border-radius:999px}
+  .rfill{height:100%; border-radius:999px}
+  .rtarget{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--text); opacity:.45; border-radius:2px}
+  .rgoal{font-size:11px; color:var(--muted); margin-top:3px}
   .targetrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line)}
   .targetrow:last-child{border-bottom:none}
   .targetrow .cico{width:36px; height:36px; min-width:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px}
@@ -337,14 +349,18 @@
   <!-- KALORIT -->
   <section id="view-food" class="view">
     <div class="card">
-      <h2>Kirjaa ateria 🍽️</h2>
+      <h2 id="mformtitle">Kirjaa ateria 🍽️</h2>
       <div class="wform">
-        <input type="date" id="mdate">
         <input type="text" id="mname" autocomplete="off" placeholder="esim. lounas (valinnainen)">
       </div>
       <div class="wform" style="margin-top:8px">
         <input type="text" id="mkcal" inputmode="numeric" autocomplete="off" placeholder="kcal">
+        <button class="btn ghost treatbtn" id="mtreat" aria-pressed="false" title="Merkitse herkuksi">🍬</button>
         <button class="btn" id="msave">Tallenna</button>
+      </div>
+      <div class="mdaterow">
+        <button class="editlink" id="mdatelink">📅 Kirjaa toiselle päivälle</button>
+        <input type="date" id="mdate">
       </div>
     </div>
     <div class="card" id="daycard"></div>
@@ -362,6 +378,7 @@
       <div class="callegend"><span class="lok">tavoitteessa</span><span class="lover">yli tavoitteen</span><span class="lnone">ei kirjauksia</span></div>
       <p class="muted" id="calsummary" style="margin:10px 0 0"></p>
     </div>
+    <div class="card" id="rulecard"></div>
   </section>
 
   <!-- MUUT -->
@@ -1285,16 +1302,30 @@ function kcalStreak(){
   }
   return streak;
 }
+let mealTreat = false;
+document.getElementById("mtreat").addEventListener("click", ()=>{
+  mealTreat = !mealTreat;
+  const b = document.getElementById("mtreat");
+  b.classList.toggle("on", mealTreat);
+  b.setAttribute("aria-pressed", mealTreat ? "true" : "false");
+});
+document.getElementById("mdatelink").addEventListener("click", ()=>{
+  document.querySelector(".mdaterow").classList.toggle("open");
+});
 document.getElementById("msave").addEventListener("click", ()=>{
-  const date = document.getElementById("mdate").value;
+  const date = document.getElementById("mdate").value || todayISO();
   const name = document.getElementById("mname").value.trim();
   const kcalEl = document.getElementById("mkcal");
   const kcal = parseInt(String(kcalEl.value).trim(), 10);
   if(!date || !isFinite(kcal) || kcal<=0 || kcal>8000){ kcalEl.focus(); return; }
-  data.meals.push({ id:uid(), date, name, kcal });
+  data.meals.push({ id:uid(), date, name, kcal, treat: mealTreat });
   save();
   document.getElementById("mname").value = "";
   kcalEl.value = "";
+  mealTreat = false;
+  const tb = document.getElementById("mtreat");
+  tb.classList.remove("on");
+  tb.setAttribute("aria-pressed","false");
   renderFood();
 });
 document.getElementById("mdate").addEventListener("change", renderFood);
@@ -1304,9 +1335,13 @@ document.getElementById("nextmonth").addEventListener("click", ()=>{ calMonth = 
 function renderFood(){
   const dEl = document.getElementById("mdate");
   if(!dEl.value) dEl.value = todayISO();
+  const iso = dEl.value;
+  document.getElementById("mformtitle").textContent =
+    iso===todayISO() ? "Kirjaa ateria 🍽️" : "Kirjaa ateria · "+fmtShort(parseISO(iso));
   renderDayCard();
   renderStreak();
   renderCalendar();
+  renderRule();
 }
 function renderDayCard(){
   const el = document.getElementById("daycard");
@@ -1330,7 +1365,7 @@ function renderDayCard(){
   ul.style.marginTop = "8px";
   meals.forEach(m=>{
     const li = document.createElement("li");
-    li.innerHTML = '<span>'+(m.name ? esc(m.name) : "Ateria")+'</span><span><b>'+m.kcal+' kcal</b></span>';
+    li.innerHTML = '<span>'+(m.treat ? "🍬 " : "")+(m.name ? esc(m.name) : "Ateria")+'</span><span><b>'+m.kcal+' kcal</b></span>';
     const del = document.createElement("button");
     del.className = "del";
     del.textContent = "✕";
@@ -1344,13 +1379,32 @@ function renderDayCard(){
   });
   el.appendChild(ul);
 }
+function treatFreeDays(){
+  if(!data.meals.length) return null;
+  const treats = data.meals.filter(m=>m.treat);
+  const today = parseISO(todayISO());
+  if(!treats.length){
+    const first = data.meals.map(m=>m.date).sort()[0];
+    return Math.floor((today - parseISO(first))/(24*3600*1000)) + 1;
+  }
+  const last = treats.map(m=>m.date).sort().pop();
+  return Math.floor((today - parseISO(last))/(24*3600*1000));
+}
 function renderStreak(){
   const el = document.getElementById("streakcard");
   const s = kcalStreak();
-  el.innerHTML = '<div class="streak"><div class="fire">'+(s>0?"🔥":"🌱")+'</div><div>'
-    + '<div class="snum">'+(s>0 ? s+(s===1?" päivä":" päivää")+" putkeen tavoitteessa" : "Putki alkamassa")+'</div>'
+  let html = '<div class="streak"><div class="fire">'+(s>0?"🔥":"🌱")+'</div><div>'
+    + '<div class="snum">'+(s>0 ? s+(s===1?" päivä":" päivää")+" putkeen tavoitteessa" : "Kaloriputki alkamassa")+'</div>'
     + '<div class="stxt">'+(s>0 ? "Hienoa, jatka samaan malliin! 💛" : "Putki alkaa ensimmäisestä päivästä, jona kirjatut kalorit pysyvät tavoitteessa.")+'</div>'
     + '</div></div>';
+  const t = treatFreeDays();
+  if(t !== null){
+    html += '<div class="streak" style="margin-top:12px"><div class="fire">'+(t>0?"🍃":"🍬")+'</div><div>'
+      + '<div class="snum">'+(t>0 ? t+(t===1?" päivä":" päivää")+" ilman herkkuja" : "Herkuton putki alkamassa")+'</div>'
+      + '<div class="stxt">'+(t>0 ? "Sokerikoukku hellittää päivä kerrallaan. 💪" : "Merkitse herkut 🍬-napilla kirjatessa — putki alkaa ensimmäisestä herkuttomasta päivästä.")+'</div>'
+      + '</div></div>';
+  }
+  el.innerHTML = html;
 }
 function renderCalendar(){
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
@@ -1376,14 +1430,80 @@ function renderCalendar(){
     else if(tot <= goal){ cls += " ok"; okDays++; loggedDays++; }
     else { cls += " over"; loggedDays++; }
     if(iso === tISO) cls += " today";
+    if(iso <= tISO) cls += " click";
     cell.className = cls;
     cell.textContent = day;
     if(tot !== undefined) cell.title = tot+" kcal";
+    if(iso <= tISO){
+      cell.addEventListener("click", ()=>{
+        document.getElementById("mdate").value = iso;
+        renderFood();
+        const dc = document.getElementById("daycard");
+        if(dc.scrollIntoView) dc.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    }
     grid.appendChild(cell);
   }
   document.getElementById("calsummary").textContent = loggedDays
     ? okDays+"/"+loggedDays+" kirjatusta päivästä tavoitteessa."
     : "Ei kirjauksia tässä kuussa vielä.";
+}
+function avgKcal(days){
+  const totals = kcalTotals();
+  let sum = 0, n = 0;
+  for(let i=0;i<days;i++){
+    const tot = totals[fmtISO(addDays(new Date(), -i))];
+    if(tot !== undefined){ sum += tot; n++; }
+  }
+  return n ? { avg: Math.round(sum/n), n } : null;
+}
+function ruleBar(label, pct, target, higherBetter){
+  const good = higherBetter ? pct>=target : pct<=target;
+  const col = good ? "var(--green)" : "var(--red)";
+  const w = Math.max(2, Math.min(100, pct));
+  return '<div class="rrow"><div class="rlab"><span>'+label+'</span><span style="color:'+col+'">'+pct+' %</span></div>'
+    + '<div class="rbar"><div class="rfill" style="width:'+w+'%; background:'+col+'"></div>'
+    + '<div class="rtarget" style="left:'+target+'%"></div></div>'
+    + '<div class="rgoal">tavoite '+(higherBetter?"vähintään ":"enintään ")+target+' %</div></div>';
+}
+function renderRule(){
+  const el = document.getElementById("rulecard");
+  const goal = data.kcalGoal, totals = kcalTotals();
+  let ok=0, logged=0, overSum=0, overDays=0, treatKcal=0, allKcal=0;
+  for(let i=0;i<30;i++){
+    const tot = totals[fmtISO(addDays(new Date(), -i))];
+    if(tot === undefined) continue;
+    logged++;
+    allKcal += tot;
+    if(tot <= goal) ok++;
+    else { overDays++; overSum += tot-goal; }
+  }
+  const today = parseISO(todayISO());
+  data.meals.forEach(m=>{
+    const diff = (today - parseISO(m.date))/(24*3600*1000);
+    if(m.treat && diff>=0 && diff<30) treatKcal += m.kcal;
+  });
+  let html = '<h2>80/20-seuranta · 30 pv ⚖️</h2>';
+  if(!logged){
+    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on. 80 % päivistä tavoitteessa riittää — jousto on osa suunnitelmaa.</div>';
+    return;
+  }
+  const okPct = Math.round(ok/logged*100);
+  const treatPct = allKcal ? Math.round(treatKcal/allKcal*100) : 0;
+  html += ruleBar("Päivät tavoitteessa", okPct, 80, true)
+    + ruleBar("Herkkujen osuus kaloreista", treatPct, 20, false)
+    + '<p class="muted" style="margin:10px 0 0">'
+    + (overDays ? "Ylityspäiviä "+overDays+" kpl ("+logged+" kirjatusta), keskimäärin +"+Math.round(overSum/overDays)+" kcal ylitys. " : "Ei yhtään ylityspäivää. 🎉 ")
+    + (okPct>=80 ? "80/20 toteutuu — juuri sopivasti joustoa!" : "80/20-malliin riittää, että 8 päivää kymmenestä osuu tavoitteeseen — täydellisyyttä ei tavoitella.")
+    + '</p>';
+  const a7 = avgKcal(7), a30 = avgKcal(30);
+  if(a7 || a30){
+    html += '<div class="stats" style="margin:12px 0 0">';
+    if(a7) html += '<div class="stat"><div class="v">'+a7.avg+'</div><div class="l">ka 7 pv · '+a7.n+' kirjattua</div></div>';
+    if(a30) html += '<div class="stat"><div class="v">'+a30.avg+'</div><div class="l">ka 30 pv · '+a30.n+' kirjattua</div></div>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 /* ---------- More / backup ---------- */
