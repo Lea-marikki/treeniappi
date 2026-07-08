@@ -1,5 +1,5 @@
-// Treeniappi service worker: verkko ensin, välimuisti varalla (offline-tuki)
-const CACHE = "treeniappi-v1";
+// Habbi service worker: verkko ensin, välimuisti varalla (offline-tuki)
+const CACHE = "habbi-v2";
 
 self.addEventListener("install", e => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));

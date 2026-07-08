@@ -1,7 +1,7 @@
 {
-  "name": "Treeniappi",
-  "short_name": "Treeniappi",
-  "description": "Viikon treenisuunnitelma ja painonseuranta",
+  "name": "Habbi",
+  "short_name": "Habbi",
+  "description": "Treenit, paino ja kalorit – hyvät tavat haltuun",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
