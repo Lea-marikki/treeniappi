@@ -41,7 +41,7 @@
   nav.tabs button{
     flex:1; background:none; border:none; padding:10px 0 9px; font-size:12px;
     color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
-    font-family:inherit;
+    font-family:inherit; min-height:56px;
   }
   nav.tabs button .ico{
     font-size:19px; line-height:1; padding:4px 16px; border-radius:999px; transition:background .15s;
@@ -61,8 +61,19 @@
     width:42px; height:42px; font-size:18px; cursor:pointer; color:var(--text);
   }
   .todaybtn{
-    display:block; margin:0 auto 14px; border:none; background:none; color:var(--accent);
-    font-size:13px; cursor:pointer; font-weight:700; font-family:inherit;
+    display:block; margin:0 auto 10px; border:none; background:none; color:var(--accent);
+    font-size:13px; cursor:pointer; font-weight:700; font-family:inherit; padding:8px; min-height:42px;
+  }
+
+  /* Phase banner */
+  .phase{
+    background:var(--accent-soft); border-radius:var(--radius); padding:11px 14px; margin-bottom:14px;
+  }
+  .phase .pmain{font-weight:800; font-size:14.5px}
+  .phase .psub{font-size:12.5px; color:var(--text); opacity:.75; margin-top:2px}
+  .phase .pbadge{
+    display:inline-block; background:var(--card); border-radius:999px; padding:3px 10px;
+    font-size:12px; font-weight:700; margin:6px 6px 0 0;
   }
 
   /* Weekly goals */
@@ -85,11 +96,11 @@
   .day{margin-bottom:16px}
   .dayhead{display:flex; align-items:center; gap:8px; margin-bottom:7px; padding:0 4px}
   .dayadd{
-    margin-left:auto; width:28px; height:28px; min-width:28px; border-radius:50%;
-    border:none; background:var(--accent-soft); color:var(--accent);
-    font-size:17px; line-height:1; cursor:pointer; font-family:inherit; font-weight:700;
+    margin-left:auto; width:42px; height:42px; min-width:42px; border-radius:50%;
+    border:none; background:none; color:var(--accent);
+    font-size:19px; line-height:1; cursor:pointer; font-family:inherit; font-weight:700;
   }
-  .dayadd:active{background:var(--accent); color:#fff}
+  .dayadd:active{background:var(--accent-soft)}
   .dayhead .dname{font-weight:800; font-size:14.5px}
   .dayhead .ddate{color:var(--muted); font-size:13px}
   .dayhead.today .dname{color:var(--accent)}
@@ -98,14 +109,14 @@
   }
   .wcard{
     background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-    padding:11px 13px; margin-bottom:8px; display:flex; align-items:center; gap:12px;
+    padding:10px 13px; margin-bottom:8px; display:flex; align-items:center; gap:11px;
   }
   .wcard .check{
-    width:30px; height:30px; min-width:30px; border-radius:50%; border:2px solid var(--line);
-    background:none; cursor:pointer; font-size:15px; line-height:1; color:#fff; padding:0;
+    width:42px; height:42px; min-width:42px; border-radius:50%; border:2px solid var(--line);
+    background:none; cursor:pointer; font-size:17px; line-height:1; color:#fff; padding:0;
     transition:transform .1s;
   }
-  .wcard .check:active{transform:scale(.88)}
+  .wcard .check:active{transform:scale(.9)}
   .wcard.done{background:var(--green-soft)}
   .wcard.done .check{background:var(--green); border-color:var(--green)}
   .wcard.missed{background:var(--red-soft)}
@@ -113,23 +124,17 @@
     width:36px; height:36px; min-width:36px; border-radius:12px; display:flex;
     align-items:center; justify-content:center; font-size:18px;
   }
-  .wcard .draghandle{
-    display:flex; align-items:center; align-self:stretch;
-    padding:11px 8px 11px 13px; margin:-11px -8px -11px -13px;
-    touch-action:none; cursor:grab;
-  }
-  .day.droptarget{
-    background:var(--accent-soft); border-radius:var(--radius);
-    outline:2px dashed var(--accent); outline-offset:3px;
-  }
-  .wcard .info{flex:1; min-width:0; cursor:pointer}
+  .wcard .info{flex:1; min-width:0; cursor:pointer; padding:6px 0}
   .wcard .t{font-weight:700; font-size:15px}
   .wcard.done .t{text-decoration:line-through; color:var(--muted)}
   .wcard .c{font-size:12.5px; color:var(--muted)}
   .wcard .missedtag{color:var(--red); font-size:12px; font-weight:700}
-  .restday{
-    color:var(--muted); font-size:13px; padding:1px 4px 4px;
-  }
+  .wcard .chev{color:var(--muted); font-size:20px; padding:0 2px}
+  .wcard.small{padding:5px 13px}
+  .wcard.small .cico{width:28px; height:28px; min-width:28px; font-size:14px}
+  .wcard.small .t{font-size:13.5px; font-weight:600}
+  .wcard.resume{border:1.5px solid var(--accent); background:var(--accent-soft); cursor:pointer}
+  .restday{color:var(--muted); font-size:13px; padding:1px 4px 4px}
 
   /* Cards & weight view */
   .card{
@@ -143,19 +148,20 @@
     min-width:0; background:#fffdfb; color:var(--text);
   }
   .wform input#wkg{flex:1}
-  .wform input[type=date]{flex:1.4}
   .btn{
     background:var(--accent); color:#fff; border:none; border-radius:12px; padding:10px 16px;
-    font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+    font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; min-height:42px;
   }
   .btn.ghost{background:var(--accent-soft); color:var(--accent)}
+  .backbtn{
+    background:none; border:none; color:var(--accent); font-weight:700; font-size:14.5px;
+    cursor:pointer; font-family:inherit; padding:8px 4px 12px 0; min-height:42px;
+  }
 
-  /* Goal progress */
+  /* Goal progress & checkpoints */
   .gprog-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
   .gprog-pct{font-size:22px; font-weight:800; color:var(--accent)}
-  .bar{
-    height:16px; background:var(--accent-soft); border-radius:999px; overflow:hidden; position:relative;
-  }
+  .bar{height:16px; background:var(--accent-soft); border-radius:999px; overflow:hidden; position:relative}
   .bar .fill{
     height:100%; border-radius:999px; min-width:16px;
     background:linear-gradient(90deg,#a99ff5,#8b7ff0);
@@ -166,14 +172,15 @@
     margin-top:12px; background:var(--accent-soft); border-radius:12px; padding:10px 12px;
     font-size:13.5px; color:var(--text);
   }
-  .goalform{display:flex; gap:8px; align-items:flex-end; margin-top:10px}
-  .goalform .gf{flex:1}
-  .goalform label{display:block; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:4px}
-  .goalform input{
-    width:100%; border:1.5px solid var(--line); border-radius:12px; padding:9px; font-size:16px;
-    font-family:inherit; background:#fffdfb; color:var(--text);
-  }
-  .editlink{background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; padding:0}
+  .cprow{display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--line); font-size:14px}
+  .cprow:last-child{border-bottom:none}
+  .cprow .cpw{font-weight:700; min-width:88px}
+  .cprow .cpt{color:var(--muted)}
+  .cprow .cpa{margin-left:auto; font-weight:700}
+  .cprow .cpa.ok{color:var(--green)}
+  .cprow .cpa.behind{color:var(--red)}
+  .cprow .cpa.wait{color:var(--muted); font-weight:400}
+  .editlink{background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; padding:8px 0; min-height:42px}
 
   .stats{display:flex; gap:8px; margin-bottom:14px}
   .stat{flex:1; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:11px 8px; text-align:center}
@@ -191,35 +198,24 @@
   .wlist{list-style:none; margin:0; padding:0}
   .wlist li{display:flex; justify-content:space-between; align-items:center; padding:8px 2px; border-bottom:1px solid var(--line); font-size:14.5px}
   .wlist li:last-child{border-bottom:none}
-  .wlist .del{background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px 8px}
+  .wlist .del{background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:10px 12px; min-height:42px; min-width:42px}
 
-  /* Sali */
+  /* Sali logging */
   .gymtitle{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
-  .tpl{display:flex; align-items:center; gap:9px; padding:10px 0; border-bottom:1px solid var(--line)}
-  .tpl:last-of-type{border-bottom:none}
-  .tpl .tinfo{flex:1; min-width:0}
-  .tpl .tname{font-weight:700; font-size:15px}
-  .tpl .tmeta{font-size:12.5px; color:var(--muted)}
-  .iconbtn{background:var(--accent-soft); color:var(--accent); border:none; border-radius:10px; padding:9px 11px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:700}
-  .exrow{display:flex; gap:8px; align-items:center; margin-bottom:8px}
-  .exrow input[type=text]{flex:1; border:1.5px solid var(--line); border-radius:10px; padding:9px; font-size:15px; font-family:inherit; background:#fffdfb; min-width:0; color:var(--text)}
-  .stepper{display:flex; align-items:center; gap:5px}
-  .stepper button{width:28px; height:28px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--accent); font-weight:700; cursor:pointer; font-family:inherit; font-size:15px}
-  .stepper span{min-width:16px; text-align:center; font-weight:700; font-size:14px}
-  .exdel{background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:4px}
   .excard .exname{font-weight:700; font-size:15px}
+  .excard .extarget{font-size:12.5px; color:var(--muted); font-weight:400; margin-left:6px}
   .exnote{width:100%; border:1.5px dashed var(--line); border-radius:10px; padding:8px; font-size:13px; font-family:inherit; background:none; color:var(--text); margin:7px 0 9px; resize:none}
   .exnote::placeholder{color:var(--muted)}
-  .sethead,.setrow{display:grid; grid-template-columns:20px 1fr 66px 56px 34px; gap:7px; align-items:center; margin-bottom:6px}
+  .sethead,.setrow{display:grid; grid-template-columns:18px 1fr 62px 56px 44px; gap:7px; align-items:center; margin-bottom:6px}
   .sethead{font-size:10.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.03em}
   .setrow .snum{font-weight:700; color:var(--muted); font-size:13px}
   .setrow .sprev{font-size:12.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .setrow input{border:1.5px solid var(--line); border-radius:9px; padding:7px 5px; font-size:15px; font-family:inherit; background:#fffdfb; width:100%; text-align:center; min-width:0; color:var(--text)}
+  .setrow input{border:1.5px solid var(--line); border-radius:9px; padding:10px 5px; font-size:15px; font-family:inherit; background:#fffdfb; width:100%; text-align:center; min-width:0; color:var(--text)}
   .setrow.done input{background:var(--green-soft)}
-  .setrow .sdone{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:none; cursor:pointer; color:#fff; font-size:13px; padding:0}
+  .setrow .sdone{width:42px; height:42px; border-radius:50%; border:2px solid var(--line); background:none; cursor:pointer; color:#fff; font-size:15px; padding:0}
   .setrow.done .sdone{background:var(--green); border-color:var(--green)}
-  .addset{background:none; border:none; color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; padding:2px 0 0}
-  .histitem{padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer}
+  .addset{background:none; border:none; color:var(--accent); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; padding:10px 0 0; min-height:42px}
+  .histitem{padding:11px 0; border-bottom:1px solid var(--line); cursor:pointer}
   .histitem:last-child{border-bottom:none}
   .histitem .hname{font-weight:700; font-size:14.5px}
   .histitem .hmeta{font-size:12.5px; color:var(--muted)}
@@ -240,17 +236,16 @@
   }
   .catpick{display:flex; flex-wrap:wrap; gap:7px}
   .catpick button{
-    border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:7px 13px;
+    border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:10px 13px;
     font-size:13.5px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;
-    color:var(--text);
+    color:var(--text); min-height:42px;
   }
   .catpick button.sel{border-color:var(--accent); background:var(--accent-soft); font-weight:700}
   .dlgactions{display:flex; gap:8px; margin-top:16px}
   .dlgactions .btn{flex:1}
   .dlgactions .danger{background:var(--red-soft); color:var(--red)}
-  /* Kalorit */
-  #mname{flex:1.4}
-  #mkcal{flex:1}
+
+  /* Ruoka */
   .kcalbar{height:14px; background:var(--green-soft); border-radius:999px; overflow:hidden; margin:8px 0 4px}
   .kcalbar .kfill{height:100%; border-radius:999px; background:var(--green); transition:width .3s ease; min-width:6px}
   .kcalbar.over{background:var(--red-soft)}
@@ -259,6 +254,25 @@
   .kcaltot .big{font-size:22px; font-weight:800}
   .kcaltot .big.ok{color:var(--green)}
   .kcaltot .big.overv{color:var(--red)}
+  .slot{padding:10px 0; border-bottom:1px solid var(--line)}
+  .slot:last-child{border-bottom:none; padding-bottom:2px}
+  .slothead{display:flex; align-items:baseline; gap:8px; margin-bottom:7px}
+  .slothead .sname{font-weight:700; font-size:14.5px}
+  .slothead .stime{font-size:12px; color:var(--muted)}
+  .slotopts{display:flex; flex-wrap:wrap; gap:7px}
+  .optbtn{
+    border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:8px 12px;
+    min-height:42px; font-size:13.5px; cursor:pointer; font-family:inherit; color:var(--text); text-align:left;
+  }
+  .optbtn .okcal{color:var(--muted); font-size:11.5px; display:block; font-weight:400}
+  .optbtn:active{background:var(--accent-soft); border-color:var(--accent)}
+  .slotdone{display:flex; align-items:center; gap:10px; background:var(--green-soft); border-radius:12px; padding:3px 3px 3px 12px; min-height:46px; margin-bottom:5px}
+  .slotdone .dn{font-weight:700; font-size:14px; flex:1; min-width:0}
+  .slotdone .dk{font-size:13px; color:var(--muted); white-space:nowrap}
+  .customform{display:flex; gap:7px; margin-top:8px}
+  .customform input{border:1.5px solid var(--line); border-radius:10px; padding:9px; font-size:15px; font-family:inherit; background:#fffdfb; color:var(--text); min-width:0}
+  .customform input.cname{flex:1.5}
+  .customform input.ckcal{flex:1}
   .streak{display:flex; align-items:center; gap:12px}
   .streak .fire{font-size:30px}
   .streak .snum{font-size:16px; font-weight:800}
@@ -293,13 +307,6 @@
   .rfill{height:100%; border-radius:999px}
   .rtarget{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--text); opacity:.45; border-radius:2px}
   .rgoal{font-size:11px; color:var(--muted); margin-top:3px}
-  .targetrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line)}
-  .targetrow:last-child{border-bottom:none}
-  .targetrow .cico{width:36px; height:36px; min-width:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px}
-  .targetrow .tinfo{flex:1; min-width:0}
-  .targetrow .tname{font-weight:700; font-size:14.5px}
-  .targetrow .tmeta{font-size:12px; color:var(--muted)}
-  .targetrow .stepper span{min-width:34px}
   .muted{color:var(--muted); font-size:13px}
   .empty-note{text-align:center; color:var(--muted); font-size:13.5px; padding:18px 0}
 </style>
@@ -320,12 +327,13 @@
       <button class="navbtn" id="nextweek" aria-label="Seuraava viikko">›</button>
     </div>
     <button class="todaybtn" id="gotoday">Tämä viikko</button>
+    <div id="phasebanner"></div>
     <div class="goals" id="summary"></div>
     <div id="days"></div>
   </section>
 
-  <!-- SALI -->
-  <section id="view-gym" class="view"><div id="gymroot"></div></section>
+  <!-- SALIKIRJAUS (avataan viikkonäkymästä) -->
+  <section id="view-log" class="view"><div id="logroot"></div></section>
 
   <!-- PAINO -->
   <section id="view-weight" class="view">
@@ -339,8 +347,10 @@
         <button class="editlink" id="wdatelink">📅 Kirjaa toiselle päivälle</button>
         <input type="date" id="wdate">
       </div>
+      <p class="muted" style="margin:8px 0 0">Punnituspäivä on perjantaiaamu.</p>
     </div>
     <div class="card" id="goalcard"></div>
+    <div class="card" id="cpcard"></div>
     <div class="stats" id="wstats"></div>
     <div class="card">
       <h2>Kehitys</h2>
@@ -353,15 +363,16 @@
     </div>
   </section>
 
-  <!-- KALORIT -->
+  <!-- RUOKA -->
   <section id="view-food" class="view">
+    <div class="card" id="daycard"></div>
     <div class="card">
-      <h2 id="mformtitle">Kirjaa ateria 🍽️</h2>
+      <h2 id="mformtitle">Muu kirjaus 🍬</h2>
       <div class="wform">
-        <input type="text" id="mname" autocomplete="off" placeholder="esim. lounas (valinnainen)">
+        <input type="text" id="mname" autocomplete="off" placeholder="esim. herkku (valinnainen)" style="flex:1.4">
       </div>
       <div class="wform" style="margin-top:8px">
-        <input type="text" id="mkcal" inputmode="numeric" autocomplete="off" placeholder="kcal">
+        <input type="text" id="mkcal" inputmode="numeric" autocomplete="off" placeholder="kcal" style="flex:1">
         <button class="btn ghost treatbtn" id="mtreat" aria-pressed="false" title="Merkitse herkuksi">🍬</button>
         <button class="btn" id="msave">Tallenna</button>
       </div>
@@ -370,14 +381,13 @@
         <input type="date" id="mdate">
       </div>
     </div>
-    <div class="card" id="daycard"></div>
     <div class="card" id="streakcard"></div>
     <div class="card">
       <div class="gymtitle">
         <h2 style="margin:0" id="caltitle"></h2>
         <div style="display:flex; gap:6px">
-          <button class="navbtn" id="prevmonth" style="width:34px;height:34px;font-size:15px" aria-label="Edellinen kuukausi">‹</button>
-          <button class="navbtn" id="nextmonth" style="width:34px;height:34px;font-size:15px" aria-label="Seuraava kuukausi">›</button>
+          <button class="navbtn" id="prevmonth" style="width:42px;height:42px;font-size:15px" aria-label="Edellinen kuukausi">‹</button>
+          <button class="navbtn" id="nextmonth" style="width:42px;height:42px;font-size:15px" aria-label="Seuraava kuukausi">›</button>
         </div>
       </div>
       <div class="calgrid h" id="calhead"></div>
@@ -391,6 +401,18 @@
   <!-- MUUT -->
   <section id="view-more" class="view">
     <div class="card">
+      <h2>Edistymisraportti 📊</h2>
+      <p class="muted">Kokoaa syksyn ohjelman toteuman, painot, kalorit ja saliliikkeiden kehityksen yhteen tiedostoon. Kopioi ja liitä Claudelle analysoitavaksi.</p>
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn" id="reportcopy" style="flex:1">Kopioi raportti</button>
+        <button class="btn ghost" id="reportdl" style="flex:1">Lataa tiedosto</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Salihistoria 🏋️</h2>
+      <div id="gymhist"></div>
+    </div>
+    <div class="card">
       <h2>Varmuuskopio 💾</h2>
       <p class="muted">Kaikki tietosi ovat tallessa vain tässä laitteessa. Ota varmuuskopio säännöllisesti – ja aina ennen puhelimen vaihtoa. Uudessa laitteessa tuot saman tiedoston takaisin.</p>
       <div style="display:flex; gap:8px; margin-top:10px">
@@ -400,21 +422,6 @@
       <input type="file" id="importfile" style="display:none">
     </div>
     <div class="card">
-      <h2>Viikkotavoitteet 🎯</h2>
-      <p class="muted">Montako kertaa viikossa tavoittelet kutakin treenityyppiä? Muutokset näkyvät heti viikkonäkymässä. (Ouran suositus: 1 × intervalli, 2 × lihaskunto, 1 × liikkuvuus, 1 × peruskestävyys 40–60 min.)</p>
-      <div id="targetlist"></div>
-    </div>
-    <div class="card">
-      <h2>Kaloritavoite 🍽️</h2>
-      <p class="muted">Päivä lasketaan onnistuneeksi, kun kirjatut kalorit pysyvät tässä rajassa.</p>
-      <div class="goalform" style="margin-top:6px">
-        <div class="gf"><label>kcal / päivä</label><input type="text" inputmode="numeric" id="kcalgoalinput"></div>
-        <div class="gf"><label>tyhjä päivä (arvio)</label><input type="text" inputmode="numeric" id="estinput"></div>
-        <button class="btn" id="kcalgoalsave">Tallenna</button>
-      </div>
-      <p class="muted" style="margin:8px 0 0">Menneet päivät ilman kirjauksia lasketaan seurannassa ja keskiarvoissa arviolla — yleensä ne ovat ulkona syötyjä päiviä.</p>
-    </div>
-    <div class="card">
       <h2>Tietoa</h2>
       <p class="muted" id="datainfo"></p>
     </div>
@@ -422,14 +429,13 @@
 </main>
 
 <nav class="tabs">
-  <button data-view="week" class="active"><span class="ico">📅</span>Viikko</button>
-  <button data-view="gym"><span class="ico">🏋️</span>Sali</button>
-  <button data-view="weight"><span class="ico">📈</span>Paino</button>
-  <button data-view="food"><span class="ico">🍽️</span>Kalorit</button>
   <button data-view="more"><span class="ico">⚙️</span>Muut</button>
+  <button data-view="weight"><span class="ico">📈</span>Paino</button>
+  <button data-view="week" class="active"><span class="ico">📅</span>Viikko</button>
+  <button data-view="food"><span class="ico">🍽️</span>Ruoka</button>
 </nav>
 
-<!-- Treenidialogi -->
+<!-- Treenidialogi (ylimääräiset treenit) -->
 <dialog id="wdialog">
   <h3 id="dlgtitle">Lisää treeni</h3>
   <div class="field">
@@ -438,11 +444,11 @@
   </div>
   <div class="field">
     <label>Treeni</label>
-    <input type="text" id="dlgname" placeholder="esim. 30 min pyöräintervallit">
+    <input type="text" id="dlgname" placeholder="esim. jooga 30 min">
   </div>
   <div class="field">
     <label>Muistiinpano (valinnainen)</label>
-    <input type="text" id="dlgnote" placeholder="esim. painot, reitti, fiilis">
+    <input type="text" id="dlgnote" placeholder="esim. reitti, fiilis">
   </div>
   <div class="dlgactions">
     <button class="btn danger" id="dlgdelete" style="display:none">Poista</button>
@@ -451,16 +457,93 @@
   </div>
 </dialog>
 
+<!-- Soututestin tulos -->
+<dialog id="testdlg">
+  <h3>12 min soututesti 🚣</h3>
+  <div class="field">
+    <label>Matka 12 minuutissa</label>
+    <input type="text" id="testkm" inputmode="decimal" autocomplete="off" placeholder="esim. 2450 m">
+  </div>
+  <div class="dlgactions">
+    <button class="btn ghost" id="testcancel">Peruuta</button>
+    <button class="btn" id="testsave">Tallenna</button>
+  </div>
+</dialog>
+
 <script>
 "use strict";
+
+/* ---------- Syksyn 2026 ohjelma ---------- */
+const PLAN = {
+  start: "2026-07-27", weeks: 18, startKg: 75, goalKg: 67,
+  phases: [
+    { from:1,  to:4,  name:"Pohja" },
+    { from:5,  to:9,  name:"Rakennus" },
+    { from:10, to:14, name:"Teho" },
+    { from:15, to:18, name:"Viimeistely" }
+  ],
+  interval: { title:"Intervallit: 4 × 3 min / 2 min palautus", sub:"kuntopyörä · 5 min kevyt alkuun ja loppuun · ~32 min" },
+  deload: [4,9,14,18],
+  tests: [1,9,18],
+  checkpoints: [ {week:4,kg:73}, {week:9,kg:71}, {week:14,kg:69}, {week:18,kg:67} ],
+  targets: { intervalli:1, lihaskunto:3, liikkuvuus:1, peruskestavyys:1 }
+};
+const GYM_PROGRAMS = {
+  A: { name:"Sali A · jalat + työntö", exercises:[
+    { name:"Kyykky", sets:3, reps:"8–10" },
+    { name:"Jalkojen ojennus laitteessa", sets:3, reps:"12" },
+    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–10" },
+    { name:"Pystypunnerrus käsipainoilla", sets:3, reps:"10" },
+    { name:"V-vatsat penkillä", sets:3, reps:"10–15" }
+  ]},
+  B: { name:"Sali B · veto + pakara", exercises:[
+    { name:"Romanialainen maastaveto", sets:3, reps:"8–10" },
+    { name:"Alatalja", sets:3, reps:"10" },
+    { name:"Ylätalja", sets:3, reps:"10" },
+    { name:"Loitontajat laitteessa", sets:3, reps:"12–15" },
+    { name:"Lähentäjät laitteessa", sets:3, reps:"12–15" },
+    { name:"Kuollut kuoriainen", sets:2, reps:"10/puoli" }
+  ]},
+  C: { name:"Sali C · koko keho", exercises:[
+    { name:"Jalkaprässi", sets:3, reps:"12" },
+    { name:"Ylätalja", sets:3, reps:"10" },
+    { name:"Hip thrust laitteessa", sets:3, reps:"10–12" },
+    { name:"Punnerrus lattialla", sets:3, reps:"max" },
+    { name:"Kylkilankku", sets:3, reps:"30 s/puoli" }
+  ]}
+};
+const MEAL_PLAN = [
+  { id:"aamupala",    name:"Aamupala",    time:"~7.00",  options:[
+    { name:"Mustikkasmoothie", kcal:355, desc:"2½ dl maitoa · 30 g proteiinijauhetta · 1½ dl mustikoita · ½ dl kaurahiutaleita · 1 rkl chiaa" },
+    { name:"Ruisleivät + kalkkuna + muna", kcal:340, desc:"2 ruisleipää · sulatejuusto · 80 g kalkkunaa · keitetty muna" }
+  ]},
+  { id:"lounas",      name:"Lounas",      time:"~11.30", options:[
+    { name:"Kanawokki", kcal:450, desc:"130 g kanaa · kasviksia · 60 g riisiä tai nuudelia (kuivapaino)" },
+    { name:"Pastasalaatti kanalla", kcal:455, desc:"70 g täysjyväpastaa (kuivapaino) · 120 g kanaa · kasviksia · kevytdressing" }
+  ]},
+  { id:"valipala",    name:"Välipala",    time:"~15.00", options:[
+    { name:"Hedelmä + proteiinipirtelö", kcal:165, desc:"1 hedelmä · 30 g proteiinijauhetta veteen" },
+    { name:"Vaniljakeso", kcal:135, desc:"150 g" }
+  ]},
+  { id:"paivallinen", name:"Päivällinen", time:"~17.30", options:[
+    { name:"Uunikasvikset + jauheliha", kcal:390, desc:"300 g kasviksia · 150 g jauhelihaa (5–7 %)" },
+    { name:"Jauhelihakeitto", kcal:400, desc:"iso annos · ~120 g jauhelihaa" },
+    { name:"Nuudelikeitto kanalla", kcal:375, desc:"50 g nuudelia (kuivapaino) · 100 g kanaa · kasviksia" },
+    { name:"Tortillat", kcal:490, desc:"2 kpl · 100 g jauhelihaa · juustoraaste · kasvikset · salsa" }
+  ]},
+  { id:"iltapala",    name:"Iltapala",    time:"~20.30", options:[
+    { name:"Kreikkalainen jogurtti + marjat", kcal:140, desc:"150 g Coop 2 % · marjoja" },
+    { name:"Kreikkalainen jogurtti + mangosose", kcal:135, desc:"150 g Coop 2 % · 50 g mangososetta" }
+  ]}
+];
 
 /* ---------- Data ---------- */
 const STORE_KEY = "treeniappi_v1";
 const CATS = {
-  intervalli:     { name:"Intervalli",     hint:"pyörä/hölkkä 30 min",   emoji:"⚡", hex:"#ff7f6e", soft:"#fff1ee", target:1 },
-  lihaskunto:     { name:"Lihaskunto",     hint:"sali/ryhmäliikunta",    emoji:"💪", hex:"#8b7ff0", soft:"#f1eefe", target:2 },
-  liikkuvuus:     { name:"Liikkuvuus",     hint:"jooga, pilates tms.",   emoji:"🧘", hex:"#3ec6a8", soft:"#e9faf5", target:1 },
-  peruskestavyys: { name:"Peruskestävyys", hint:"40–60 min",             emoji:"🚶", hex:"#4aa8e8", soft:"#ecf5fd", target:1 }
+  intervalli:     { name:"Intervalli",     emoji:"⚡", hex:"#ff7f6e", soft:"#fff1ee" },
+  lihaskunto:     { name:"Lihaskunto",     emoji:"💪", hex:"#8b7ff0", soft:"#f1eefe" },
+  liikkuvuus:     { name:"Liikkuvuus",     emoji:"🧘", hex:"#3ec6a8", soft:"#e9faf5" },
+  peruskestavyys: { name:"Peruskestävyys", emoji:"🚶", hex:"#4aa8e8", soft:"#ecf5fd" }
 };
 const CAT_MIGRATION = { voima:"lihaskunto", cardio:"intervalli", kavely:"peruskestavyys" };
 const DAYNAMES = ["Maanantai","Tiistai","Keskiviikko","Torstai","Perjantai","Lauantai","Sunnuntai"];
@@ -473,7 +556,7 @@ function load(){
       const d = JSON.parse(raw);
       if(d && Array.isArray(d.workouts) && Array.isArray(d.weights)){
         d.workouts.forEach(w=>{ if(CAT_MIGRATION[w.cat]) w.cat = CAT_MIGRATION[w.cat]; });
-        if(!("goal" in d)) d.goal = null;
+        d.goal = { startKg: PLAN.startKg, goalKg: PLAN.goalKg };
         if(!Array.isArray(d.templates)) d.templates = [];
         if(!Array.isArray(d.gymlog)) d.gymlog = [];
         if(!("activeGym" in d)) d.activeGym = null;
@@ -481,14 +564,12 @@ function load(){
         if(typeof d.kcalGoal !== "number") d.kcalGoal = 1700;
         if(typeof d.emptyEstimate !== "number") d.emptyEstimate = 2500;
         if(!d.targets || typeof d.targets !== "object") d.targets = {};
-        Object.keys(CATS).forEach(k=>{ if(typeof d.targets[k] !== "number") d.targets[k] = CATS[k].target; });
         return d;
       }
     }
   }catch(e){ console.warn("Load failed", e); }
-  const targets = {};
-  Object.keys(CATS).forEach(k=>{ targets[k] = CATS[k].target; });
-  return { workouts: [], weights: [], goal: null, templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, emptyEstimate: 2500, targets };
+  return { workouts: [], weights: [], goal: { startKg: PLAN.startKg, goalKg: PLAN.goalKg },
+    templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, emptyEstimate: 2500, targets: {} };
 }
 function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -527,44 +608,123 @@ function parseKg(v){
   const kg = parseFloat(String(v).trim().replace(",","."));
   return (isFinite(kg) && kg>0 && kg<400) ? Math.round(kg*10)/10 : null;
 }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, ch=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
+}
+
+/* ---------- Ohjelman apurit ---------- */
+function planMonday(week){ return addDays(parseISO(PLAN.start), (week-1)*7); }
+function planWeekOf(dateISO){
+  const diff = Math.round((parseISO(dateISO) - parseISO(PLAN.start)) / 86400000);
+  const wk = Math.floor(diff/7) + 1;
+  return (diff >= 0 && wk >= 1 && wk <= PLAN.weeks) ? wk : null;
+}
+function phaseOf(wk){ return PLAN.phases.find(p=>wk>=p.from && wk<=p.to) || null; }
+function plannedItems(dISO){
+  const wk = planWeekOf(dISO);
+  if(!wk) return [];
+  const wd = (parseISO(dISO).getDay()+6)%7;
+  const deload = PLAN.deload.includes(wk);
+  const items = [];
+  if(wd===0) items.push({ key:"A", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.A.name,
+    sub: deload ? "kevennys: −30 % kuormista" : "kyykky + laitteet" });
+  if(wd===1){
+    if(PLAN.tests.includes(wk)){
+      let sub = "soutulaite: lämmittely 10 min + 12 min täysillä · kirjaa matka";
+      const prev = data.workouts.filter(w=>w.plan==="TEST" && w.note && w.date<dISO)
+        .sort((a,b)=>a.date<b.date?-1:1).pop();
+      if(prev) sub = "edellinen: "+prev.note+" · sama vastus";
+      items.push({ key:"TEST", type:"test", cat:"intervalli", title:"12 min soututesti", sub });
+    }else if(deload){
+      items.push({ key:"INT", type:"check", cat:"intervalli", title:"Kevyt pyöräily 20 min", sub:"kevennysviikko" });
+    }else{
+      items.push({ key:"INT", type:"check", cat:"intervalli", title:PLAN.interval.title, sub:PLAN.interval.sub });
+    }
+  }
+  if(wd===2) items.push({ key:"B", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.B.name,
+    sub: deload ? "kevennys: −30 % kuormista" : "RDL + laitteet" });
+  if(wd===3) items.push({ key:"PK", type:"check", cat:"peruskestavyys",
+    title: deload ? "Kevyt soutu 30 min" : "Tasasoutu 45 min", sub:"rauhallinen, puhekelpoinen" });
+  if(wd===4) items.push({ key:"C", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.C.name,
+    sub:"laitepäivä, kevyempi" });
+  if(wd===6) items.push({ key:"MOB", type:"check", cat:"liikkuvuus", title:"Jooga tai venyttely",
+    sub:"la tai su, 15–30 min" });
+  return items;
+}
+function planWorkout(dISO, key){ return data.workouts.find(w=>w.date===dISO && w.plan===key); }
+function togglePlanned(dISO, item){
+  const ex = planWorkout(dISO, item.key);
+  if(ex){
+    data.workouts = data.workouts.filter(w=>w!==ex);
+  }else if(item.type==="test"){
+    openTestDialog(dISO, item);
+    return;
+  }else{
+    data.workouts.push({ id:uid(), date:dISO, cat:item.cat, title:item.title, note:"", done:true, plan:item.key });
+  }
+  save(); renderWeek();
+}
 
 /* ---------- State ---------- */
 let weekStart = mondayOf(new Date());
 let dlgState = { id:null, date:null, cat:"intervalli" };
-let editingGoal = false;
 
-/* ---------- Tabs ---------- */
+/* ---------- Näkymät ja välilehdet ---------- */
+function showView(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  const tab = name==="log" ? "week" : name;
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("active", b.dataset.view===tab));
+}
 document.querySelectorAll("nav.tabs button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
-    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-    document.getElementById("view-"+btn.dataset.view).classList.add("active");
-    if(btn.dataset.view==="gym") renderGym();
+    showView(btn.dataset.view);
+    if(btn.dataset.view==="week") renderWeek();
     if(btn.dataset.view==="weight") renderWeight();
     if(btn.dataset.view==="food") renderFood();
     if(btn.dataset.view==="more") renderMore();
   });
 });
 
-/* ---------- Week view ---------- */
+/* ---------- Viikko ---------- */
 document.getElementById("prevweek").addEventListener("click", ()=>{ weekStart = addDays(weekStart,-7); renderWeek(); });
 document.getElementById("nextweek").addEventListener("click", ()=>{ weekStart = addDays(weekStart, 7); renderWeek(); });
 document.getElementById("gotoday").addEventListener("click", ()=>{ weekStart = mondayOf(new Date()); renderWeek(); });
 
-function workoutsOn(dateISO){
-  return data.workouts.filter(w=>w.date===dateISO);
+function workoutsOn(dateISO){ return data.workouts.filter(w=>w.date===dateISO); }
+
+function renderPhaseBanner(){
+  const el = document.getElementById("phasebanner");
+  const wk = planWeekOf(fmtISO(weekStart));
+  if(!wk){ el.innerHTML = ""; return; }
+  const ph = phaseOf(wk);
+  let badges = "";
+  if(PLAN.deload.includes(wk)) badges += '<span class="pbadge">🌿 Kevennysviikko</span>';
+  if(PLAN.tests.includes(wk)) badges += '<span class="pbadge">🧪 12 min soututesti</span>';
+  const cp = PLAN.checkpoints.find(c=>c.week===wk);
+  if(cp) badges += '<span class="pbadge">🎯 Välitavoite '+String(cp.kg).replace(".",",")+' kg</span>';
+  el.innerHTML = '<div class="phase"><div class="pmain">Ohjelmaviikko '+wk+'/'+PLAN.weeks+' · '+ph.name+'</div>'
+    + '<div class="psub">Syksy 2026: 75 → 67 kg · lihaskunto · VO2max</div>'
+    + (badges ? '<div>'+badges+'</div>' : "")
+    + '</div>';
 }
+
 function renderWeek(){
   const end = addDays(weekStart,6);
   document.getElementById("weektitle").textContent = "Viikko " + isoWeek(weekStart);
   document.getElementById("weekrange").textContent = fmtShort(weekStart)+" – "+fmtShort(end)+" "+end.getFullYear();
+  renderPhaseBanner();
 
-  // Weekly goals vs done
+  // Viikkotavoitteet
   const sums = {};
   Object.keys(CATS).forEach(k=>sums[k]={done:0,total:0});
   for(let i=0;i<7;i++){
-    workoutsOn(fmtISO(addDays(weekStart,i))).forEach(w=>{
+    const dISO = fmtISO(addDays(weekStart,i));
+    plannedItems(dISO).forEach(it=>{
+      sums[it.cat].total++;
+      if(planWorkout(dISO, it.key)) sums[it.cat].done++;
+    });
+    workoutsOn(dISO).filter(w=>!w.plan).forEach(w=>{
       if(!sums[w.cat]) return;
       sums[w.cat].total++;
       if(w.done) sums[w.cat].done++;
@@ -574,12 +734,10 @@ function renderWeek(){
   sEl.innerHTML = "";
   Object.entries(CATS).forEach(([k,c])=>{
     const s = sums[k];
-    const target = data.targets[k];
+    const target = PLAN.targets[k];
     if(target===0 && s.total===0) return;
     const met = target>0 && s.done >= target;
-    const count = target===0
-      ? s.done+" tehty"
-      : (met ? "tavoite täynnä!" : s.done+"/"+target+(s.total>s.done?" · "+(s.total-s.done)+" suunniteltu":""));
+    const count = met ? "tavoite täynnä!" : s.done+"/"+target+(s.total>s.done?" · "+(s.total-s.done)+" suunniteltu":"");
     const g = document.createElement("div");
     g.className = "goal" + (met ? " met" : "");
     g.innerHTML =
@@ -589,10 +747,23 @@ function renderWeek(){
     sEl.appendChild(g);
   });
 
-  // Days
+  // Päivät
   const daysEl = document.getElementById("days");
   daysEl.innerHTML = "";
   const tISO = todayISO();
+
+  // Kesken oleva salitreeni
+  if(data.activeGym){
+    const r = document.createElement("div");
+    r.className = "wcard resume";
+    r.innerHTML = '<div class="cico" style="background:#fff">🏋️</div>'
+      + '<div class="info"><div class="t">Kesken: '+esc(data.activeGym.name)+'</div>'
+      + '<div class="c">'+fmtShort(parseISO(data.activeGym.date))+' · jatka kirjausta</div></div>'
+      + '<span class="chev">›</span>';
+    r.addEventListener("click", openLog);
+    daysEl.appendChild(r);
+  }
+
   for(let i=0;i<7;i++){
     const d = addDays(weekStart,i);
     const dISO = fmtISO(d);
@@ -600,7 +771,6 @@ function renderWeek(){
 
     const day = document.createElement("div");
     day.className = "day";
-    day.dataset.date = dISO;
     const head = document.createElement("div");
     head.className = "dayhead" + (isToday?" today":"");
     head.innerHTML = '<span class="dname">'+DAYNAMES[i]+'</span><span class="ddate">'+fmtShort(d)+'</span>'
@@ -613,116 +783,91 @@ function renderWeek(){
     head.appendChild(add);
     day.appendChild(head);
 
-    const dayWorkouts = workoutsOn(dISO);
-    dayWorkouts.forEach(w=>{
-      const missed = !w.done && dISO < tISO;
-      const cat = CATS[w.cat] || {name:w.cat, emoji:"🏃", hex:"#999", soft:"#eee"};
+    let count = 0;
+
+    // Ohjelman treenit
+    plannedItems(dISO).forEach(it=>{
+      count++;
+      const done = !!planWorkout(dISO, it.key);
+      const missed = !done && dISO < tISO;
+      const cat = CATS[it.cat];
       const card = document.createElement("div");
-      card.className = "wcard" + (w.done?" done":"") + (missed?" missed":"");
+      card.className = "wcard" + (it.small?" small":"") + (done?" done":"") + (missed?" missed":"");
 
       const ico = document.createElement("div");
       ico.className = "cico";
       ico.style.background = cat.soft;
       ico.textContent = cat.emoji;
-      const handle = document.createElement("div");
-      handle.className = "draghandle";
-      handle.setAttribute("aria-label","Siirrä treeni raahaamalla");
-      handle.appendChild(ico);
-      initCardDrag(handle, card, w);
+      card.appendChild(ico);
 
+      const pw = planWorkout(dISO, it.key);
+      const subTxt = (done && pw && pw.note) ? pw.note : it.sub;
+      const info = document.createElement("div");
+      info.className = "info";
+      info.innerHTML = '<div class="t">'+esc(it.title)+'</div>'
+        + (subTxt && !it.small ? '<div class="c">'+esc(subTxt)+'</div>' : "")
+        + (missed && !it.small ? '<div class="missedtag">jäi väliin</div>' : "");
+      card.appendChild(info);
+
+      if(it.type==="gym"){
+        if(!done){
+          info.addEventListener("click", ()=>startPlanGym(dISO, it.key));
+          const chev = document.createElement("span");
+          chev.className = "chev";
+          chev.textContent = "›";
+          card.appendChild(chev);
+        }
+      }else{
+        info.addEventListener("click", ()=>togglePlanned(dISO, it));
+      }
+
+      const chk = document.createElement("button");
+      chk.className = "check";
+      chk.setAttribute("aria-label", done ? "Merkitse tekemättömäksi" : "Merkitse tehdyksi");
+      chk.textContent = done ? "✓" : "";
+      chk.addEventListener("click", ()=>togglePlanned(dISO, it));
+      card.appendChild(chk);
+      day.appendChild(card);
+    });
+
+    // Muut treenit (itse lisätyt)
+    workoutsOn(dISO).filter(w=>!w.plan).forEach(w=>{
+      count++;
+      const missed = !w.done && dISO < tISO;
+      const cat = CATS[w.cat] || {name:w.cat, emoji:"🏃", hex:"#999", soft:"#eee"};
+      const card = document.createElement("div");
+      card.className = "wcard" + (w.done?" done":"") + (missed?" missed":"");
+      card.innerHTML = '<div class="cico" style="background:'+cat.soft+'">'+cat.emoji+'</div>';
       const info = document.createElement("div");
       info.className = "info";
       info.innerHTML = '<div class="t">'+esc(w.title||cat.name)+'</div>'
         + '<div class="c">'+cat.name + (w.note ? " · "+esc(w.note) : "") + '</div>'
         + (missed ? '<div class="missedtag">jäi väliin</div>' : "");
       info.addEventListener("click", ()=>openDialog(dISO, w));
-
       const chk = document.createElement("button");
       chk.className = "check";
       chk.setAttribute("aria-label", w.done ? "Merkitse tekemättömäksi" : "Merkitse tehdyksi");
       chk.textContent = w.done ? "✓" : "";
       chk.addEventListener("click", ()=>{ w.done = !w.done; save(); renderWeek(); });
-
-      card.appendChild(handle);
       card.appendChild(info);
       card.appendChild(chk);
       day.appendChild(card);
     });
 
-    if(dayWorkouts.length===0){
+    if(count===0){
       const rest = document.createElement("div");
       rest.className = "restday";
       rest.textContent = "Lepopäivä";
       day.appendChild(rest);
     }
-
     daysEl.appendChild(day);
   }
 }
-function esc(s){
-  return String(s).replace(/[&<>"']/g, ch=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
-}
 
-/* ---------- Treenin siirto raahaamalla ---------- */
-function moveWorkout(w, newDate){
-  if(!newDate || newDate===w.date) return;
-  w.date = newDate;
-  save(); renderWeek();
-}
-function initCardDrag(handle, card, w){
-  handle.addEventListener("pointerdown", e=>{
-    e.preventDefault();
-    let ghost = null, over = null;
-    const r = card.getBoundingClientRect();
-    const offX = e.clientX - r.left, offY = e.clientY - r.top;
-    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
-    function ensureGhost(){
-      if(ghost) return;
-      ghost = card.cloneNode(true);
-      ghost.style.cssText = "position:fixed; width:"+r.width+"px; z-index:99; pointer-events:none; opacity:.95; margin:0; transform:rotate(1.5deg) scale(1.02); box-shadow:0 12px 30px rgba(80,60,110,.3); background:#fff;";
-      document.body.appendChild(ghost);
-      card.style.opacity = ".35";
-    }
-    function onMove(ev){
-      if(!ghost && Math.abs(ev.clientX-(r.left+offX))<6 && Math.abs(ev.clientY-(r.top+offY))<6) return;
-      ensureGhost();
-      ghost.style.left = (ev.clientX-offX)+"px";
-      ghost.style.top = (ev.clientY-offY)+"px";
-      if(ev.clientY < 110) window.scrollBy(0,-14);
-      else if(ev.clientY > window.innerHeight-110) window.scrollBy(0,14);
-      ghost.style.display = "none";
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
-      ghost.style.display = "";
-      const day = el ? el.closest(".day") : null;
-      if(over && over!==day) over.classList.remove("droptarget");
-      over = day;
-      if(day) day.classList.add("droptarget");
-    }
-    function onUp(){
-      const target = over, dragged = !!ghost;
-      cleanup();
-      if(dragged && target) moveWorkout(w, target.dataset.date);
-      else if(dragged) renderWeek();
-    }
-    function onCancel(){ cleanup(); renderWeek(); }
-    function cleanup(){
-      if(ghost) ghost.remove();
-      if(over) over.classList.remove("droptarget");
-      card.style.opacity = "";
-      handle.removeEventListener("pointermove", onMove);
-      handle.removeEventListener("pointerup", onUp);
-      handle.removeEventListener("pointercancel", onCancel);
-    }
-    handle.addEventListener("pointermove", onMove);
-    handle.addEventListener("pointerup", onUp);
-    handle.addEventListener("pointercancel", onCancel);
-  });
-}
-
-/* ---------- Workout dialog ---------- */
+/* ---------- Treenidialogi (itse lisätyt) ---------- */
 const dlg = document.getElementById("wdialog");
 function openDialog(dateISO, w){
-  dlgState = { id: w?w.id:null, date: dateISO, cat: w?w.cat:"intervalli" };
+  dlgState = { id: w?w.id:null, date: dateISO, cat: w?w.cat:"peruskestavyys" };
   document.getElementById("dlgtitle").textContent = w ? "Muokkaa treeniä" : "Lisää treeni · "+fmtShort(parseISO(dateISO));
   document.getElementById("dlgname").value = w ? (w.title||"") : "";
   document.getElementById("dlgnote").value = w ? (w.note||"") : "";
@@ -738,7 +883,6 @@ function renderCatPick(){
     b.type = "button";
     b.className = k===dlgState.cat ? "sel" : "";
     b.textContent = c.emoji+" "+c.name;
-    b.title = c.hint;
     b.addEventListener("click", ()=>{ dlgState.cat = k; renderCatPick(); });
     el.appendChild(b);
   });
@@ -760,7 +904,166 @@ document.getElementById("dlgdelete").addEventListener("click", ()=>{
   save(); dlg.close(); renderWeek();
 });
 
-/* ---------- Weight: trend & goal helpers ---------- */
+/* ---------- Soututestin tulosdialogi ---------- */
+const testdlg = document.getElementById("testdlg");
+let testState = null;
+function openTestDialog(dISO, item){
+  testState = { date:dISO, item };
+  document.getElementById("testkm").value = "";
+  testdlg.showModal();
+}
+document.getElementById("testcancel").addEventListener("click", ()=>testdlg.close());
+document.getElementById("testsave").addEventListener("click", ()=>{
+  const el = document.getElementById("testkm");
+  let v = el.value.trim();
+  if(!v){ el.focus(); return; }
+  if(/^[\d\s.,]+$/.test(v)) v += " m";
+  data.workouts.push({ id:uid(), date:testState.date, cat:testState.item.cat,
+    title:testState.item.title, note:v, done:true, plan:testState.item.key });
+  save(); testdlg.close(); renderWeek();
+});
+
+/* ---------- Salikirjaus ---------- */
+function fmtKgNum(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
+function lastPerformance(name){
+  const key = String(name).trim().toLowerCase();
+  for(let i=data.gymlog.length-1;i>=0;i--){
+    const ex = data.gymlog[i].exercises.find(e=>e.name.trim().toLowerCase()===key);
+    if(ex && ex.sets.length) return ex;
+  }
+  return null;
+}
+function lastNote(name){
+  const p = lastPerformance(name);
+  return p && p.note ? p.note : "";
+}
+function startPlanGym(dISO, key){
+  if(data.activeGym && !(data.activeGym.date===dISO && data.activeGym.planKey===key)){
+    if(!confirm("Kesken on "+data.activeGym.name+" ("+fmtShort(parseISO(data.activeGym.date))+"). Hylätäänkö se ja aloitetaanko uusi?")){
+      openLog(); return;
+    }
+    data.activeGym = null;
+  }
+  if(!data.activeGym){
+    const p = GYM_PROGRAMS[key];
+    data.activeGym = {
+      id:uid(), date:dISO, planKey:key, templateId:null, name:p.name,
+      exercises: p.exercises.map(e=>({
+        name:e.name, target:e.sets+" × "+e.reps, note:lastNote(e.name),
+        sets: Array.from({length:e.sets}, ()=>({kg:"", reps:"", done:false}))
+      }))
+    };
+    save();
+  }
+  openLog();
+}
+function openLog(){ showView("log"); renderLog(); }
+function renderLog(){
+  const root = document.getElementById("logroot");
+  root.innerHTML = "";
+  const ag = data.activeGym;
+  if(!ag){ showView("week"); renderWeek(); return; }
+
+  const back = document.createElement("button");
+  back.className = "backbtn";
+  back.textContent = "‹ Takaisin viikkoon";
+  back.addEventListener("click", ()=>{ showView("week"); renderWeek(); });
+  root.appendChild(back);
+
+  const wk = planWeekOf(ag.date);
+  const deload = wk && PLAN.deload.includes(wk);
+  const head = document.createElement("div");
+  head.className = "card";
+  head.innerHTML = '<div class="gymtitle"><h2 style="margin:0">'+esc(ag.name)+' · '+fmtShort(parseISO(ag.date))+'</h2></div>'
+    + '<p class="muted" style="margin:0">Kirjaa kg ja toistot, kuittaa sarja ✓:llä. Tyhjä sarja täyttyy kuitatessa edellisen kerran luvuilla.'
+    + (deload ? " 🌿 Kevennysviikko: −30 % kuormista." : "")+'</p>';
+  root.appendChild(head);
+
+  ag.exercises.forEach(ex=>{
+    const card = document.createElement("div");
+    card.className = "card excard";
+    const title = document.createElement("div");
+    title.className = "exname";
+    title.innerHTML = esc(ex.name) + (ex.target ? '<span class="extarget">'+esc(ex.target)+'</span>' : "");
+    card.appendChild(title);
+    const prev = lastPerformance(ex.name);
+    const note = document.createElement("textarea");
+    note.className = "exnote";
+    note.rows = 1;
+    note.placeholder = "Muistiinpano (näkyy myös ens kerralla)";
+    note.value = ex.note || "";
+    note.addEventListener("input", ()=>{ ex.note = note.value; save(); });
+    card.appendChild(note);
+    const headRow = document.createElement("div");
+    headRow.className = "sethead";
+    headRow.innerHTML = "<span>#</span><span>Viimeksi</span><span>kg</span><span>toistot</span><span></span>";
+    card.appendChild(headRow);
+    ex.sets.forEach((s,si)=>{
+      const row = document.createElement("div");
+      row.className = "setrow" + (s.done ? " done" : "");
+      const pset = prev ? (prev.sets[si] || prev.sets[prev.sets.length-1]) : null;
+      const ptxt = pset ? fmtKgNum(pset.kg)+" kg × "+pset.reps : "–";
+      row.innerHTML = '<span class="snum">'+(si+1)+'</span><span class="sprev">'+ptxt+'</span>';
+      const kgI = document.createElement("input");
+      kgI.inputMode = "decimal"; kgI.value = s.kg;
+      kgI.addEventListener("input", ()=>{ s.kg = kgI.value; save(); });
+      const repI = document.createElement("input");
+      repI.inputMode = "numeric"; repI.value = s.reps;
+      repI.addEventListener("input", ()=>{ s.reps = repI.value; save(); });
+      const doneB = document.createElement("button");
+      doneB.className = "sdone";
+      doneB.textContent = s.done ? "✓" : "";
+      doneB.setAttribute("aria-label","Kuittaa sarja");
+      doneB.addEventListener("click", ()=>{
+        if(!s.done && s.kg==="" && s.reps==="" && pset){ s.kg = String(pset.kg).replace(".",","); s.reps = String(pset.reps); }
+        s.done = !s.done; save(); renderLog();
+      });
+      row.appendChild(kgI); row.appendChild(repI); row.appendChild(doneB);
+      card.appendChild(row);
+    });
+    const addS = document.createElement("button");
+    addS.className = "addset";
+    addS.textContent = "+ Lisää sarja";
+    addS.addEventListener("click", ()=>{ ex.sets.push({kg:"", reps:"", done:false}); save(); renderLog(); });
+    card.appendChild(addS);
+    root.appendChild(card);
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "dlgactions";
+  actions.style.marginBottom = "14px";
+  const discard = document.createElement("button");
+  discard.className = "btn danger";
+  discard.textContent = "Hylkää";
+  discard.addEventListener("click", ()=>{
+    if(confirm("Hylätäänkö treeni? Kirjaukset katoavat.")){ data.activeGym = null; save(); showView("week"); renderWeek(); }
+  });
+  const finish = document.createElement("button");
+  finish.className = "btn";
+  finish.textContent = "Treeni valmis ✓";
+  finish.addEventListener("click", finishGym);
+  actions.appendChild(discard); actions.appendChild(finish);
+  root.appendChild(actions);
+}
+function finishGym(){
+  const ag = data.activeGym;
+  const exercises = ag.exercises.map(ex=>({
+    name: ex.name, note: ex.note||"",
+    sets: ex.sets.filter(s=>s.done).map(s=>({ kg: parseKg(s.kg)!==null ? parseKg(s.kg) : 0, reps: parseInt(String(s.reps).trim(),10)||0 })).filter(s=>s.reps>0)
+  })).filter(ex=>ex.sets.length);
+  if(!exercises.length){ alert("Kuittaa vähintään yksi sarja ✓ ja anna toistot ennen valmistumista."); return; }
+  if(!confirm("Merkitäänkö treeni valmiiksi?")) return;
+  data.gymlog.push({ id: ag.id, date: ag.date, planKey: ag.planKey||null, templateId: null, name: ag.name, exercises });
+  data.gymlog.sort((a,b)=>a.date<b.date?-1:1);
+  if(ag.planKey && !planWorkout(ag.date, ag.planKey)){
+    data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true, plan: ag.planKey });
+  }
+  data.activeGym = null;
+  save();
+  showView("week"); renderWeek();
+}
+
+/* ---------- Paino ---------- */
 function trendSeries(weights){
   return weights.map(w=>{
     const t = parseISO(w.date).getTime();
@@ -773,7 +1076,6 @@ function trendSeries(weights){
   });
 }
 function goalEstimate(trend, goalKg){
-  // slope from trend over last 30 days -> estimated goal date
   if(trend.length < 2) return null;
   const last = trend[trend.length-1];
   const lastT = parseISO(last.date).getTime();
@@ -781,8 +1083,8 @@ function goalEstimate(trend, goalKg){
   if(window.length < 2) return null;
   const first = window[0];
   const days = (lastT - parseISO(first.date).getTime()) / (24*3600*1000);
-  if(days < 5) return null; // liian lyhyt jakso luotettavaan arvioon
-  const slope = (last.kg - first.kg) / days; // kg/day
+  if(days < 5) return null;
+  const slope = (last.kg - first.kg) / days;
   const remaining = last.kg - goalKg;
   if(remaining <= 0) return { reached:true };
   if(slope >= -0.005) return { rising:true, weeklyRate: slope*7 };
@@ -791,8 +1093,6 @@ function goalEstimate(trend, goalKg){
   const target = addDays(parseISO(last.date), Math.round(daysLeft));
   return { date: target, weeklyRate: slope*7 };
 }
-
-/* ---------- Weight view ---------- */
 document.getElementById("wsave").addEventListener("click", ()=>{
   const dateEl = document.getElementById("wdate");
   const kgEl = document.getElementById("wkg");
@@ -814,31 +1114,6 @@ document.getElementById("wdate").addEventListener("change", renderWeight);
 function renderGoalCard(ws, trend){
   const el = document.getElementById("goalcard");
   const g = data.goal;
-
-  if(editingGoal || !g){
-    const startDefault = g ? g.startKg : (ws.length ? ws[0].kg : "");
-    const goalDefault = g ? g.goalKg : "";
-    el.innerHTML = '<h2>Tavoite 🎯</h2>'
-      + (g ? "" : '<p class="muted">Aseta aloituspaino ja tavoitepaino, niin näet matkasi edistymisen.</p>')
-      + '<div class="goalform">'
-      + '<div class="gf"><label>Aloituspaino</label><input type="text" inputmode="decimal" id="gstart" value="'+startDefault+'"></div>'
-      + '<div class="gf"><label>Tavoitepaino</label><input type="text" inputmode="decimal" id="ggoal" value="'+goalDefault+'"></div>'
-      + '<button class="btn" id="gsave">Tallenna</button>'
-      + '</div>';
-    el.querySelector("#gsave").addEventListener("click", ()=>{
-      const s = parseKg(el.querySelector("#gstart").value);
-      const t = parseKg(el.querySelector("#ggoal").value);
-      if(s===null || t===null || t>=s){
-        alert("Tarkista luvut: tavoitepainon pitää olla pienempi kuin aloituspainon.");
-        return;
-      }
-      data.goal = { startKg:s, goalKg:t };
-      editingGoal = false;
-      save(); renderWeight();
-    });
-    return;
-  }
-
   const current = trend.length ? trend[trend.length-1].kg : g.startKg;
   const total = g.startKg - g.goalKg;
   const doneKg = Math.max(0, Math.min(total, g.startKg - current));
@@ -867,9 +1142,38 @@ function renderGoalCard(ws, trend){
     + '<div class="bar-labels"><span>'+g.startKg.toFixed(1).replace(".",",")+' kg</span>'
     + '<span><b>'+(left>0 ? "vielä "+left.toFixed(1).replace(".",",")+" kg" : "perillä!")+'</b></span>'
     + '<span>'+g.goalKg.toFixed(1).replace(".",",")+' kg</span></div>'
-    + etaHtml
-    + '<div style="margin-top:10px; text-align:right"><button class="editlink" id="geditbtn">Muokkaa tavoitetta</button></div>';
-  el.querySelector("#geditbtn").addEventListener("click", ()=>{ editingGoal = true; renderWeight(); });
+    + etaHtml;
+}
+function checkpointActual(cpDate, trend){
+  const lo = fmtISO(addDays(cpDate,-7)), hi = fmtISO(addDays(cpDate,2));
+  const cands = trend.filter(t=>t.date>=lo && t.date<=hi);
+  return cands.length ? cands[cands.length-1].kg : null;
+}
+function renderCheckpoints(trend){
+  const el = document.getElementById("cpcard");
+  const t = todayISO();
+  let html = '<h2>Välitavoitteet 📍</h2>';
+  PLAN.checkpoints.forEach(cp=>{
+    const cpDate = addDays(planMonday(cp.week), 4); // perjantai
+    const cpISO = fmtISO(cpDate);
+    let aHtml;
+    if(t < cpISO){
+      aHtml = '<span class="cpa wait">edessä</span>';
+    }else{
+      const a = checkpointActual(cpDate, trend);
+      if(a===null){
+        aHtml = '<span class="cpa wait">ei punnitusta</span>';
+      }else{
+        const diff = a - cp.kg;
+        const ok = diff <= 0.3;
+        aHtml = '<span class="cpa '+(ok?"ok":"behind")+'">'+fmtKgNum(a)+' kg'
+          + (ok ? " ✓" : " (+"+fmtKgNum(diff)+")")+'</span>';
+      }
+    }
+    html += '<div class="cprow"><span class="cpw">Vko '+cp.week+' · '+fmtShort(cpDate)+'</span>'
+      + '<span class="cpt">tavoite '+String(cp.kg).replace(".",",")+' kg</span>'+aHtml+'</div>';
+  });
+  el.innerHTML = html;
 }
 
 function renderWeight(){
@@ -885,8 +1189,8 @@ function renderWeight(){
   const listEl = document.getElementById("wlist");
 
   renderGoalCard(ws, trend);
+  renderCheckpoints(trend);
 
-  // Stats
   statsEl.innerHTML = "";
   if(ws.length){
     const last = ws[ws.length-1];
@@ -908,18 +1212,16 @@ function renderWeight(){
     });
   }
 
-  // Chart (last 90 days)
   chartEl.innerHTML = "";
   const cutoff = fmtISO(addDays(new Date(),-90));
   const cw = ws.filter(w=>w.date>=cutoff);
-  document.getElementById("goallegend").style.display = data.goal ? "" : "none";
+  document.getElementById("goallegend").style.display = "";
   if(cw.length < 2){
     chartEl.innerHTML = '<div class="empty-note">Käyrä piirtyy, kun kirjauksia on vähintään kaksi. 📈</div>';
   }else{
-    chartEl.appendChild(buildChart(cw, trend.filter(t=>t.date>=cutoff), data.goal ? data.goal.goalKg : null));
+    chartEl.appendChild(buildChart(cw, trend.filter(t=>t.date>=cutoff), data.goal.goalKg));
   }
 
-  // List (latest 14)
   listEl.innerHTML = "";
   if(!ws.length){
     listEl.innerHTML = '<div class="empty-note">Ei kirjauksia vielä.</div>';
@@ -961,7 +1263,6 @@ function buildChart(points, trend, goalKg){
   const svg = document.createElementNS(svgNS,"svg");
   svg.setAttribute("viewBox","0 0 "+W+" "+H);
 
-  // Y grid
   const range = max-min;
   const step = range>8 ? 2 : range>4 ? 1 : 0.5;
   for(let v=Math.ceil(min/step)*step; v<=max; v+=step){
@@ -978,7 +1279,6 @@ function buildChart(points, trend, goalKg){
     txt.textContent = step<1 ? v.toFixed(1) : Math.round(v);
     svg.appendChild(txt);
   }
-  // X labels
   [points[0], points[Math.floor(points.length/2)], points[points.length-1]].forEach((p,i)=>{
     const d = parseISO(p.date);
     const txt = document.createElementNS(svgNS,"text");
@@ -990,7 +1290,6 @@ function buildChart(points, trend, goalKg){
     svg.appendChild(txt);
   });
 
-  // Goal line (dashed)
   if(goalKg !== null && goalKg > min && goalKg < max){
     const gl = document.createElementNS(svgNS,"line");
     gl.setAttribute("x1",padL); gl.setAttribute("x2",W-padR);
@@ -1000,7 +1299,6 @@ function buildChart(points, trend, goalKg){
     svg.appendChild(gl);
   }
 
-  // Daily line (light)
   const path = document.createElementNS(svgNS,"path");
   path.setAttribute("d", points.map((p,i)=>(i?"L":"M")+X(parseISO(p.date).getTime()).toFixed(1)+" "+Y(p.kg).toFixed(1)).join(" "));
   path.setAttribute("fill","none");
@@ -1016,7 +1314,6 @@ function buildChart(points, trend, goalKg){
     svg.appendChild(c);
   });
 
-  // Trend line (bold)
   const tpath = document.createElementNS(svgNS,"path");
   tpath.setAttribute("d", trend.map((p,i)=>(i?"L":"M")+X(parseISO(p.date).getTime()).toFixed(1)+" "+Y(p.kg).toFixed(1)).join(" "));
   tpath.setAttribute("fill","none");
@@ -1028,272 +1325,10 @@ function buildChart(points, trend, goalKg){
   return svg;
 }
 
-/* ---------- Sali ---------- */
-let gymEdit = null;
-let histOpen = null;
-
-function fmtKgNum(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
-function lastPerformance(name){
-  const key = String(name).trim().toLowerCase();
-  for(let i=data.gymlog.length-1;i>=0;i--){
-    const ex = data.gymlog[i].exercises.find(e=>e.name.trim().toLowerCase()===key);
-    if(ex && ex.sets.length) return ex;
-  }
-  return null;
-}
-function renderGym(){
-  const root = document.getElementById("gymroot");
-  if(!root) return;
-  root.innerHTML = "";
-  if(data.activeGym) renderGymActive(root);
-  else if(gymEdit) renderGymEdit(root);
-  else renderGymHome(root);
-}
-function renderGymHome(root){
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = '<h2>Treenipohjat 🏋️</h2>';
-  if(!data.templates.length){
-    card.innerHTML += '<p class="muted">Luo pohja salitreenillesi: liikkeet ja sarjamäärät. Treeniä kirjatessa näet aina mitä teit viimeksi.</p>';
-  }
-  data.templates.forEach(t=>{
-    const row = document.createElement("div");
-    row.className = "tpl";
-    const logs = data.gymlog.filter(g=>g.templateId===t.id);
-    const last = logs.length ? logs[logs.length-1].date : null;
-    const meta = t.exercises.length + " liikettä" + (last ? " · viimeksi "+fmtShort(parseISO(last)) : "");
-    row.innerHTML = '<div class="tinfo"><div class="tname">'+esc(t.name)+'</div><div class="tmeta">'+meta+'</div></div>';
-    const editB = document.createElement("button");
-    editB.className = "iconbtn";
-    editB.textContent = "✎";
-    editB.setAttribute("aria-label","Muokkaa pohjaa");
-    editB.addEventListener("click", ()=>{ gymEdit = JSON.parse(JSON.stringify(t)); renderGym(); });
-    const startB = document.createElement("button");
-    startB.className = "btn";
-    startB.style.padding = "8px 14px";
-    startB.textContent = "Aloita";
-    startB.addEventListener("click", ()=>startGym(t));
-    row.appendChild(editB);
-    row.appendChild(startB);
-    card.appendChild(row);
-  });
-  const newB = document.createElement("button");
-  newB.className = "btn ghost";
-  newB.style.cssText = "width:100%; margin-top:10px";
-  newB.textContent = "+ Uusi pohja";
-  newB.addEventListener("click", ()=>{ gymEdit = { id:null, name:"", exercises:[{name:"", sets:3, note:""}] }; renderGym(); });
-  card.appendChild(newB);
-  root.appendChild(card);
-
-  const hist = document.createElement("div");
-  hist.className = "card";
-  hist.innerHTML = '<h2>Historia</h2>';
-  if(!data.gymlog.length){
-    hist.innerHTML += '<div class="empty-note">Ei salitreenejä vielä.</div>';
-  }
-  data.gymlog.slice(-15).reverse().forEach(g=>{
-    const item = document.createElement("div");
-    item.className = "histitem";
-    const setCount = g.exercises.reduce((s,e)=>s+e.sets.length,0);
-    item.innerHTML = '<div class="hname">'+esc(g.name)+' · '+fmtShort(parseISO(g.date))+'</div>'
-      + '<div class="hmeta">'+g.exercises.length+' liikettä · '+setCount+' sarjaa</div>';
-    if(histOpen===g.id){
-      const det = document.createElement("div");
-      det.className = "histdetail";
-      det.innerHTML = g.exercises.map(e=>'<b>'+esc(e.name)+':</b> '+e.sets.map(s=>fmtKgNum(s.kg)+'×'+s.reps).join(", ")).join("<br>");
-      item.appendChild(det);
-    }
-    item.addEventListener("click", ()=>{ histOpen = histOpen===g.id ? null : g.id; renderGym(); });
-    hist.appendChild(item);
-  });
-  root.appendChild(hist);
-}
-function syncGymEditFromDOM(root){
-  const name = root.querySelector("#tplname");
-  if(name) gymEdit.name = name.value;
-  root.querySelectorAll(".exrow input[type=text]").forEach((inp,i)=>{
-    if(gymEdit.exercises[i]) gymEdit.exercises[i].name = inp.value;
-  });
-}
-function renderGymEdit(root){
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = '<h2>'+(gymEdit.id ? "Muokkaa pohjaa" : "Uusi pohja")+'</h2>'
-    + '<div class="field"><label>Pohjan nimi</label><input type="text" id="tplname" placeholder="esim. Koko kroppa" value="'+esc(gymEdit.name)+'"></div>'
-    + '<div class="field"><label>Liikkeet ja sarjamäärät</label><div id="exlist"></div></div>';
-  const list = card.querySelector("#exlist");
-  gymEdit.exercises.forEach((ex,i)=>{
-    const row = document.createElement("div");
-    row.className = "exrow";
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.placeholder = "Liikkeen nimi";
-    inp.value = ex.name;
-    inp.addEventListener("input", ()=>{ ex.name = inp.value; });
-    const step = document.createElement("div");
-    step.className = "stepper";
-    const minus = document.createElement("button"); minus.textContent = "−";
-    const num = document.createElement("span"); num.textContent = ex.sets;
-    const plus = document.createElement("button"); plus.textContent = "+";
-    minus.addEventListener("click", ()=>{ if(ex.sets>1){ ex.sets--; num.textContent = ex.sets; } });
-    plus.addEventListener("click", ()=>{ if(ex.sets<10){ ex.sets++; num.textContent = ex.sets; } });
-    step.appendChild(minus); step.appendChild(num); step.appendChild(plus);
-    const del = document.createElement("button");
-    del.className = "exdel"; del.textContent = "✕";
-    del.setAttribute("aria-label","Poista liike");
-    del.addEventListener("click", ()=>{ syncGymEditFromDOM(root); gymEdit.exercises.splice(i,1); renderGym(); });
-    row.appendChild(inp); row.appendChild(step); row.appendChild(del);
-    list.appendChild(row);
-  });
-  const addEx = document.createElement("button");
-  addEx.className = "addset";
-  addEx.textContent = "+ Lisää liike";
-  addEx.addEventListener("click", ()=>{ syncGymEditFromDOM(root); gymEdit.exercises.push({name:"", sets:3, note:""}); renderGym(); });
-  card.appendChild(addEx);
-  const actions = document.createElement("div");
-  actions.className = "dlgactions";
-  if(gymEdit.id){
-    const delT = document.createElement("button");
-    delT.className = "btn danger";
-    delT.textContent = "Poista";
-    delT.addEventListener("click", ()=>{
-      if(confirm("Poistetaanko pohja \""+gymEdit.name+"\"? Historia säilyy.")){
-        data.templates = data.templates.filter(t=>t.id!==gymEdit.id);
-        gymEdit = null; save(); renderGym();
-      }
-    });
-    actions.appendChild(delT);
-  }
-  const cancel = document.createElement("button");
-  cancel.className = "btn ghost"; cancel.textContent = "Peruuta";
-  cancel.addEventListener("click", ()=>{ gymEdit = null; renderGym(); });
-  const saveB = document.createElement("button");
-  saveB.className = "btn"; saveB.textContent = "Tallenna";
-  saveB.addEventListener("click", ()=>{
-    syncGymEditFromDOM(root);
-    gymEdit.name = gymEdit.name.trim();
-    gymEdit.exercises = gymEdit.exercises.filter(e=>e.name.trim()!=="");
-    if(!gymEdit.name || !gymEdit.exercises.length){ alert("Anna pohjalle nimi ja vähintään yksi liike."); return; }
-    if(gymEdit.id){
-      const i = data.templates.findIndex(t=>t.id===gymEdit.id);
-      if(i>=0) data.templates[i] = gymEdit;
-    }else{
-      gymEdit.id = uid();
-      data.templates.push(gymEdit);
-    }
-    gymEdit = null; save(); renderGym();
-  });
-  actions.appendChild(cancel); actions.appendChild(saveB);
-  card.appendChild(actions);
-  root.appendChild(card);
-}
-function startGym(t){
-  data.activeGym = {
-    id: uid(), date: todayISO(), templateId: t.id, name: t.name,
-    exercises: t.exercises.map(e=>({ name:e.name, note:e.note||"", sets: Array.from({length:e.sets}, ()=>({kg:"", reps:"", done:false})) }))
-  };
-  save(); renderGym();
-}
-function renderGymActive(root){
-  const ag = data.activeGym;
-  const head = document.createElement("div");
-  head.className = "card";
-  head.innerHTML = '<div class="gymtitle"><h2 style="margin:0">'+esc(ag.name)+' · '+fmtShort(parseISO(ag.date))+'</h2></div>'
-    + '<p class="muted" style="margin:0">Kirjaa kg ja toistot, kuittaa sarja ✓:llä. Tyhjä sarja täyttyy kuitatessa edellisen kerran luvuilla. Kesken oleva treeni säilyy muistissa, vaikka sulkisit apin.</p>';
-  root.appendChild(head);
-
-  ag.exercises.forEach(ex=>{
-    const card = document.createElement("div");
-    card.className = "card excard";
-    const title = document.createElement("div");
-    title.className = "exname";
-    title.textContent = ex.name;
-    card.appendChild(title);
-    const prev = lastPerformance(ex.name);
-    const note = document.createElement("textarea");
-    note.className = "exnote";
-    note.rows = 1;
-    note.placeholder = "Muistiinpano (näkyy myös ens kerralla)";
-    note.value = ex.note || "";
-    note.addEventListener("input", ()=>{ ex.note = note.value; save(); });
-    card.appendChild(note);
-    const headRow = document.createElement("div");
-    headRow.className = "sethead";
-    headRow.innerHTML = "<span>#</span><span>Viimeksi</span><span>kg</span><span>toistot</span><span></span>";
-    card.appendChild(headRow);
-    ex.sets.forEach((s,si)=>{
-      const row = document.createElement("div");
-      row.className = "setrow" + (s.done ? " done" : "");
-      const pset = prev ? (prev.sets[si] || prev.sets[prev.sets.length-1]) : null;
-      const ptxt = pset ? fmtKgNum(pset.kg)+" kg × "+pset.reps : "–";
-      row.innerHTML = '<span class="snum">'+(si+1)+'</span><span class="sprev">'+ptxt+'</span>';
-      const kgI = document.createElement("input");
-      kgI.inputMode = "decimal"; kgI.value = s.kg;
-      kgI.addEventListener("input", ()=>{ s.kg = kgI.value; save(); });
-      const repI = document.createElement("input");
-      repI.inputMode = "numeric"; repI.value = s.reps;
-      repI.addEventListener("input", ()=>{ s.reps = repI.value; save(); });
-      const doneB = document.createElement("button");
-      doneB.className = "sdone";
-      doneB.textContent = s.done ? "✓" : "";
-      doneB.setAttribute("aria-label","Kuittaa sarja");
-      doneB.addEventListener("click", ()=>{
-        if(!s.done && s.kg==="" && s.reps==="" && pset){ s.kg = String(pset.kg).replace(".",","); s.reps = String(pset.reps); }
-        s.done = !s.done; save(); renderGym();
-      });
-      row.appendChild(kgI); row.appendChild(repI); row.appendChild(doneB);
-      card.appendChild(row);
-    });
-    const addS = document.createElement("button");
-    addS.className = "addset";
-    addS.textContent = "+ Lisää sarja";
-    addS.addEventListener("click", ()=>{ ex.sets.push({kg:"", reps:"", done:false}); save(); renderGym(); });
-    card.appendChild(addS);
-    root.appendChild(card);
-  });
-
-  const actions = document.createElement("div");
-  actions.className = "dlgactions";
-  actions.style.marginBottom = "14px";
-  const discard = document.createElement("button");
-  discard.className = "btn danger";
-  discard.textContent = "Hylkää";
-  discard.addEventListener("click", ()=>{
-    if(confirm("Hylätäänkö treeni? Kirjaukset katoavat.")){ data.activeGym = null; save(); renderGym(); }
-  });
-  const finish = document.createElement("button");
-  finish.className = "btn";
-  finish.textContent = "Treeni valmis ✓";
-  finish.addEventListener("click", finishGym);
-  actions.appendChild(discard); actions.appendChild(finish);
-  root.appendChild(actions);
-}
-function finishGym(){
-  const ag = data.activeGym;
-  const exercises = ag.exercises.map(ex=>({
-    name: ex.name, note: ex.note||"",
-    sets: ex.sets.filter(s=>s.done).map(s=>({ kg: parseKg(s.kg)!==null ? parseKg(s.kg) : 0, reps: parseInt(String(s.reps).trim(),10)||0 })).filter(s=>s.reps>0)
-  })).filter(ex=>ex.sets.length);
-  if(!exercises.length){ alert("Kuittaa vähintään yksi sarja ✓ ja anna toistot ennen valmistumista."); return; }
-  if(!confirm("Merkitäänkö treeni valmiiksi?")) return;
-  data.gymlog.push({ id: ag.id, date: ag.date, templateId: ag.templateId, name: ag.name, exercises });
-  data.gymlog.sort((a,b)=>a.date<b.date?-1:1);
-  const tpl = data.templates.find(t=>t.id===ag.templateId);
-  if(tpl){
-    tpl.exercises.forEach(te=>{
-      const src = ag.exercises.find(e=>e.name.trim().toLowerCase()===te.name.trim().toLowerCase());
-      if(src) te.note = src.note||"";
-    });
-  }
-  data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true });
-  data.activeGym = null;
-  save(); renderWeek(); renderGym();
-  alert("Treeni tallennettu 💪 Lihaskunto kuitattu viikkonäkymään.");
-}
-
-/* ---------- Kalorit ---------- */
+/* ---------- Ruoka ---------- */
 let calMonth = (()=>{ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); })();
 const MONTHNAMES = ["Tammikuu","Helmikuu","Maaliskuu","Huhtikuu","Toukokuu","Kesäkuu","Heinäkuu","Elokuu","Syyskuu","Lokakuu","Marraskuu","Joulukuu"];
+let openSlot = null;
 
 function mealsOn(iso){ return data.meals.filter(m=>m.date===iso); }
 function kcalTotals(){
@@ -1322,6 +1357,12 @@ function kcalStreak(){
   }
   return streak;
 }
+function logMeal(iso, slotId, name, kcal, treat){
+  data.meals.push({ id:uid(), date:iso, name, kcal, treat:!!treat, slot: slotId||undefined });
+  save();
+  openSlot = null;
+  renderFood();
+}
 let mealTreat = false;
 document.getElementById("mtreat").addEventListener("click", ()=>{
   mealTreat = !mealTreat;
@@ -1348,7 +1389,7 @@ document.getElementById("msave").addEventListener("click", ()=>{
   tb.setAttribute("aria-pressed","false");
   renderFood();
 });
-document.getElementById("mdate").addEventListener("change", renderFood);
+document.getElementById("mdate").addEventListener("change", ()=>{ openSlot = null; renderFood(); });
 document.getElementById("prevmonth").addEventListener("click", ()=>{ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderCalendar(); });
 document.getElementById("nextmonth").addEventListener("click", ()=>{ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+1, 1); renderCalendar(); });
 
@@ -1357,7 +1398,7 @@ function renderFood(){
   if(!dEl.value) dEl.value = todayISO();
   const iso = dEl.value;
   document.getElementById("mformtitle").textContent =
-    iso===todayISO() ? "Kirjaa ateria 🍽️" : "Kirjaa ateria · "+fmtShort(parseISO(iso));
+    iso===todayISO() ? "Muu kirjaus 🍬" : "Muu kirjaus · "+fmtShort(parseISO(iso));
   renderDayCard();
   renderStreak();
   renderCalendar();
@@ -1376,32 +1417,93 @@ function renderDayCard(){
     + '<div class="kcaltot"><span class="big '+(total===0?"":(over?"overv":"ok"))+'">'+total+' kcal</span>'
     + '<span class="muted">tavoite '+goal+' kcal'+(over ? " · "+(total-goal)+" yli" : " · "+(goal-total)+" jäljellä")+'</span></div>'
     + '<div class="kcalbar'+(over?" over":"")+'"><div class="kfill" style="width:'+Math.min(100, goal>0 ? total/goal*100 : 0)+'%"></div></div>';
-  if(!meals.length){
-    const fm = firstMealDate();
-    const isEst = fm && iso >= fm && iso < todayISO();
-    el.innerHTML += '<div class="empty-note">'+(isEst
-      ? "Ei kirjauksia — 80/20-seurannassa päivä lasketaan arviolla "+data.emptyEstimate+" kcal. Voit myös kirjata ateriat jälkikäteen."
-      : "Ei kirjauksia tälle päivälle vielä.")+'</div>';
-    return;
-  }
-  const ul = document.createElement("ul");
-  ul.className = "wlist";
-  ul.style.marginTop = "8px";
-  meals.forEach(m=>{
-    const li = document.createElement("li");
-    li.innerHTML = '<span>'+(m.treat ? "🍬 " : "")+(m.name ? esc(m.name) : "Ateria")+'</span><span><b>'+m.kcal+' kcal</b></span>';
-    const del = document.createElement("button");
-    del.className = "del";
-    del.textContent = "✕";
-    del.setAttribute("aria-label","Poista ateria");
-    del.addEventListener("click", ()=>{
-      data.meals = data.meals.filter(x=>x.id!==m.id);
-      save(); renderFood();
-    });
-    li.appendChild(del);
-    ul.appendChild(li);
+
+  // Ateriarunko
+  MEAL_PLAN.forEach(slot=>{
+    const logged = meals.filter(m=>m.slot===slot.id);
+    const row = document.createElement("div");
+    row.className = "slot";
+    const head = document.createElement("div");
+    head.className = "slothead";
+    head.innerHTML = '<span class="sname">'+slot.name+'</span><span class="stime">'+slot.time+'</span>';
+    row.appendChild(head);
+    if(logged.length){
+      logged.forEach(m=>{
+        const dr = document.createElement("div");
+        dr.className = "slotdone";
+        dr.innerHTML = '<span class="dn">✓ '+(m.treat?"🍬 ":"")+esc(m.name||slot.name)+'</span><span class="dk">'+m.kcal+' kcal</span>';
+        const del = document.createElement("button");
+        del.className = "del";
+        del.textContent = "✕";
+        del.style.cssText = "background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;min-width:42px;min-height:42px";
+        del.setAttribute("aria-label","Poista ateria");
+        del.addEventListener("click", ()=>{
+          data.meals = data.meals.filter(x=>x.id!==m.id);
+          save(); renderFood();
+        });
+        dr.appendChild(del);
+        row.appendChild(dr);
+      });
+    }else{
+      const opts = document.createElement("div");
+      opts.className = "slotopts";
+      slot.options.forEach(o=>{
+        const b = document.createElement("button");
+        b.className = "optbtn";
+        b.innerHTML = esc(o.name)+'<span class="okcal">'+o.kcal+' kcal'+(o.desc ? ' · '+esc(o.desc) : '')+'</span>';
+        b.addEventListener("click", ()=>logMeal(iso, slot.id, o.name, o.kcal, false));
+        opts.appendChild(b);
+      });
+      const other = document.createElement("button");
+      other.className = "optbtn";
+      other.innerHTML = 'muu…<span class="okcal">oma kirjaus</span>';
+      other.addEventListener("click", ()=>{ openSlot = openSlot===slot.id ? null : slot.id; renderFood(); });
+      opts.appendChild(other);
+      row.appendChild(opts);
+      if(openSlot===slot.id){
+        const form = document.createElement("div");
+        form.className = "customform";
+        const nameI = document.createElement("input");
+        nameI.className = "cname"; nameI.placeholder = slot.name; nameI.autocomplete = "off";
+        const kcalI = document.createElement("input");
+        kcalI.className = "ckcal"; kcalI.placeholder = "kcal"; kcalI.inputMode = "numeric"; kcalI.autocomplete = "off";
+        const saveB = document.createElement("button");
+        saveB.className = "btn"; saveB.textContent = "Kirjaa";
+        saveB.addEventListener("click", ()=>{
+          const kcal = parseInt(String(kcalI.value).trim(), 10);
+          if(!isFinite(kcal) || kcal<=0 || kcal>8000){ kcalI.focus(); return; }
+          logMeal(iso, slot.id, nameI.value.trim()||slot.name, kcal, false);
+        });
+        form.appendChild(nameI); form.appendChild(kcalI); form.appendChild(saveB);
+        row.appendChild(form);
+        setTimeout(()=>nameI.focus(), 0);
+      }
+    }
+    el.appendChild(row);
   });
-  el.appendChild(ul);
+
+  // Rungon ulkopuoliset kirjaukset
+  const extras = meals.filter(m=>!m.slot);
+  if(extras.length){
+    const ul = document.createElement("ul");
+    ul.className = "wlist";
+    ul.style.marginTop = "8px";
+    extras.forEach(m=>{
+      const li = document.createElement("li");
+      li.innerHTML = '<span>'+(m.treat ? "🍬 " : "")+(m.name ? esc(m.name) : "Muu")+'</span><span><b>'+m.kcal+' kcal</b></span>';
+      const del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "✕";
+      del.setAttribute("aria-label","Poista kirjaus");
+      del.addEventListener("click", ()=>{
+        data.meals = data.meals.filter(x=>x.id!==m.id);
+        save(); renderFood();
+      });
+      li.appendChild(del);
+      ul.appendChild(li);
+    });
+    el.appendChild(ul);
+  }
 }
 function treatFreeDays(){
   if(!data.meals.length) return null;
@@ -1464,6 +1566,7 @@ function renderCalendar(){
       cell.setAttribute("aria-label", day+"."+(m+1)+". — näytä päivän kirjaukset");
       cell.addEventListener("click", ()=>{
         document.getElementById("mdate").value = iso;
+        openSlot = null;
         renderFood();
         const dc = document.getElementById("daycard");
         if(dc.scrollIntoView) dc.scrollIntoView({behavior:"smooth", block:"start"});
@@ -1537,42 +1640,107 @@ function renderRule(){
   el.innerHTML = html;
 }
 
-/* ---------- More / backup ---------- */
+/* ---------- Raportti ---------- */
+function buildReport(){
+  const t = todayISO();
+  const wk = planWeekOf(t);
+  const weeks = [];
+  for(let w=1; w<=PLAN.weeks; w++){
+    const mon = planMonday(w);
+    if(fmtISO(mon) > t) break;
+    const cats = {};
+    Object.keys(CATS).forEach(k=>cats[k]={tehty:0, suunniteltu:0});
+    const missed = [];
+    for(let i=0;i<7;i++){
+      const dISO = fmtISO(addDays(mon,i));
+      plannedItems(dISO).forEach(it=>{
+        cats[it.cat].suunniteltu++;
+        if(planWorkout(dISO, it.key)) cats[it.cat].tehty++;
+        else if(dISO < t && it.type!=="check") missed.push(dISO+" "+it.title);
+      });
+      workoutsOn(dISO).filter(x=>!x.plan && x.done).forEach(x=>{
+        if(cats[x.cat]) cats[x.cat].tehty++;
+      });
+    }
+    const ph = phaseOf(w);
+    weeks.push({ vko:w, jakso: ph ? ph.name : "", treenit:cats, valiin: missed.length?missed:undefined });
+  }
+  const totals = kcalTotals(), first = firstMealDate();
+  const kcalDays = [];
+  for(let d = parseISO(PLAN.start); fmtISO(d) < t; d = addDays(d,1)){
+    const info = dayInfo(fmtISO(d), totals, first);
+    if(info) kcalDays.push({ pvm:fmtISO(d), kcal:info.tot, arvio:info.est||undefined });
+  }
+  const herkut = data.meals.filter(m=>m.treat && m.date>=PLAN.start)
+    .map(m=>({ pvm:m.date, nimi:m.name||"herkku", kcal:m.kcal }));
+  const sali = {};
+  data.gymlog.forEach(g=>g.exercises.forEach(e=>{
+    let top = null;
+    e.sets.forEach(s=>{ if(!top || s.kg>top.kg) top = s; });
+    if(!top) return;
+    (sali[e.name] = sali[e.name] || []).push({ pvm:g.date, kg:top.kg, toistot:top.reps });
+  }));
+  return {
+    luotu: t,
+    ohjelma: "Syksy 2026 (27.7.–29.11.), viikko " + (wk || "ohjelman ulkopuolella") + "/" + PLAN.weeks,
+    tavoitteet: { alkupaino: PLAN.startKg, tavoitepaino: PLAN.goalKg, kcalPaivassa: data.kcalGoal },
+    checkpointit: PLAN.checkpoints.map(cp=>({ vko:cp.week, pvm:fmtISO(addDays(planMonday(cp.week),4)), tavoiteKg:cp.kg })),
+    painot: data.weights,
+    treeniviikot: weeks,
+    soututestit: data.workouts.filter(w=>w.plan==="TEST" && w.done).map(w=>({ pvm:w.date, tulos:w.note })),
+    kaloripaivat: kcalDays,
+    herkut,
+    saliliikkeet: sali
+  };
+}
+document.getElementById("reportcopy").addEventListener("click", ()=>{
+  const txt = JSON.stringify(buildReport(), null, 1);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt)
+      .then(()=>alert("Raportti kopioitu leikepöydälle. Liitä se Claudelle analysoitavaksi. 📊"))
+      .catch(()=>downloadReport(txt));
+  }else{
+    downloadReport(txt);
+  }
+});
+document.getElementById("reportdl").addEventListener("click", ()=>downloadReport(JSON.stringify(buildReport(), null, 1)));
+function downloadReport(txt){
+  const blob = new Blob([txt], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "habbi-raportti-"+todayISO()+".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ---------- Muut ---------- */
+let histOpen = null;
 function renderMore(){
   document.getElementById("datainfo").textContent =
-    "Treenejä kirjattu: " + data.workouts.length + " kpl · Painokirjauksia: " + data.weights.length + " kpl · Salitreenejä: " + data.gymlog.length + " kpl · Aterioita: " + data.meals.length + " kpl.";
-  const tl = document.getElementById("targetlist");
-  tl.innerHTML = "";
-  Object.entries(CATS).forEach(([k,c])=>{
-    const row = document.createElement("div");
-    row.className = "targetrow";
-    row.innerHTML = '<div class="cico" style="background:'+c.soft+'">'+c.emoji+'</div>'
-      + '<div class="tinfo"><div class="tname">'+c.name+'</div><div class="tmeta">'+c.hint+'</div></div>';
-    const step = document.createElement("div");
-    step.className = "stepper";
-    const minus = document.createElement("button"); minus.textContent = "−";
-    const num = document.createElement("span"); num.textContent = data.targets[k]+" ×";
-    const plus = document.createElement("button"); plus.textContent = "+";
-    minus.addEventListener("click", ()=>{ if(data.targets[k]>0){ data.targets[k]--; save(); renderMore(); renderWeek(); } });
-    plus.addEventListener("click", ()=>{ if(data.targets[k]<7){ data.targets[k]++; save(); renderMore(); renderWeek(); } });
-    step.appendChild(minus); step.appendChild(num); step.appendChild(plus);
-    row.appendChild(step);
-    tl.appendChild(row);
+    "Syksyn ohjelma 27.7.–29.11.2026 · Kaloritavoite " + data.kcalGoal + " kcal · Treenejä kirjattu: " + data.workouts.length
+    + " · Painokirjauksia: " + data.weights.length + " · Salitreenejä: " + data.gymlog.length + " · Aterioita: " + data.meals.length + ".";
+  const hist = document.getElementById("gymhist");
+  hist.innerHTML = "";
+  if(!data.gymlog.length){
+    hist.innerHTML = '<div class="empty-note">Ei salitreenejä vielä.</div>';
+    return;
+  }
+  data.gymlog.slice(-15).reverse().forEach(g=>{
+    const item = document.createElement("div");
+    item.className = "histitem";
+    const setCount = g.exercises.reduce((s,e)=>s+e.sets.length,0);
+    item.innerHTML = '<div class="hname">'+esc(g.name)+' · '+fmtShort(parseISO(g.date))+'</div>'
+      + '<div class="hmeta">'+g.exercises.length+' liikettä · '+setCount+' sarjaa</div>';
+    if(histOpen===g.id){
+      const det = document.createElement("div");
+      det.className = "histdetail";
+      det.innerHTML = g.exercises.map(e=>'<b>'+esc(e.name)+':</b> '+e.sets.map(s=>fmtKgNum(s.kg)+'×'+s.reps).join(", ")).join("<br>");
+      item.appendChild(det);
+    }
+    item.addEventListener("click", ()=>{ histOpen = histOpen===g.id ? null : g.id; renderMore(); });
+    hist.appendChild(item);
   });
-  document.getElementById("kcalgoalinput").value = data.kcalGoal;
-  document.getElementById("estinput").value = data.emptyEstimate;
 }
-document.getElementById("kcalgoalsave").addEventListener("click", ()=>{
-  const el = document.getElementById("kcalgoalinput");
-  const v = parseInt(String(el.value).trim(), 10);
-  if(!isFinite(v) || v<500 || v>6000){ alert("Anna kaloritavoite väliltä 500–6000 kcal."); el.focus(); return; }
-  const eEl = document.getElementById("estinput");
-  const ev = parseInt(String(eEl.value).trim(), 10);
-  if(!isFinite(ev) || ev<500 || ev>8000){ alert("Anna tyhjän päivän arvio väliltä 500–8000 kcal."); eEl.focus(); return; }
-  data.kcalGoal = v;
-  data.emptyEstimate = ev;
-  save(); renderMore(); renderFood();
-});
 document.getElementById("exportbtn").addEventListener("click", ()=>{
   const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
   const a = document.createElement("a");
@@ -1598,12 +1766,6 @@ document.getElementById("importfile").addEventListener("change", e=>{
         const byDate = new Map(data.weights.map(w=>[w.date,w]));
         d.weights.forEach(w=>byDate.set(w.date,w));
         data.weights = [...byDate.values()].sort((a,b)=>a.date<b.date?-1:1);
-        if(d.goal) data.goal = d.goal;
-        if(Array.isArray(d.templates)){
-          const bt = new Map(data.templates.map(t=>[t.id,t]));
-          d.templates.forEach(t=>bt.set(t.id,t));
-          data.templates = [...bt.values()];
-        }
         if(Array.isArray(d.gymlog)){
           const bg = new Map(data.gymlog.map(g=>[g.id,g]));
           d.gymlog.forEach(g=>bg.set(g.id,g));
@@ -1615,10 +1777,8 @@ document.getElementById("importfile").addEventListener("change", e=>{
           data.meals = [...bm.values()];
         }
         if(typeof d.kcalGoal === "number") data.kcalGoal = d.kcalGoal;
-        if(d.targets && typeof d.targets === "object"){
-          Object.keys(CATS).forEach(k=>{ if(typeof d.targets[k] === "number") data.targets[k] = d.targets[k]; });
-        }
-        save(); renderWeek(); renderWeight(); renderGym(); renderMore(); renderFood();
+        if(typeof d.emptyEstimate === "number") data.emptyEstimate = d.emptyEstimate;
+        save(); renderWeek(); renderWeight(); renderMore(); renderFood();
         alert("Tiedot tuotu ja yhdistetty.");
       }
     }catch(err){
@@ -1632,8 +1792,8 @@ document.getElementById("importfile").addEventListener("change", e=>{
 /* ---------- Init ---------- */
 renderWeek();
 renderWeight();
-renderGym();
 renderFood();
+renderMore();
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(e=>console.warn("SW-rekisteröinti epäonnistui", e));
 }

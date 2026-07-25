@@ -1,5 +1,5 @@
 // Habbi service worker: verkko ensin, välimuisti varalla (offline-tuki)
-const CACHE = "habbi-v2";
+const CACHE = "habbi-v3";
 
 self.addEventListener("install", e => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
