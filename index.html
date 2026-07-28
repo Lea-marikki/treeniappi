@@ -457,6 +457,24 @@
   </div>
 </dialog>
 
+<!-- Ohjelman treenin muokkaus -->
+<dialog id="plandlg">
+  <h3 id="plantitle">Muokkaa treeniä</h3>
+  <div class="field">
+    <label>Treeni</label>
+    <input type="text" id="planname" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>Muistiinpano (valinnainen)</label>
+    <input type="text" id="plannote" autocomplete="off" placeholder="esim. matka, fiilis">
+  </div>
+  <div class="dlgactions">
+    <button class="btn danger" id="planreset" style="display:none">Palauta oletus</button>
+    <button class="btn ghost" id="plancancel">Peruuta</button>
+    <button class="btn" id="plansave">Tallenna</button>
+  </div>
+</dialog>
+
 <!-- Soututestin tulos -->
 <dialog id="testdlg">
   <h3>12 min soututesti 🚣</h3>
@@ -631,7 +649,7 @@ function plannedItems(dISO){
   if(wd===1){
     if(PLAN.tests.includes(wk)){
       let sub = "soutulaite: lämmittely 10 min + 12 min täysillä · kirjaa matka";
-      const prev = data.workouts.filter(w=>w.plan==="TEST" && w.note && w.date<dISO)
+      const prev = data.workouts.filter(w=>w.plan==="TEST" && w.done && w.note && w.date<dISO)
         .sort((a,b)=>a.date<b.date?-1:1).pop();
       if(prev) sub = "edellinen: "+prev.note+" · sama vastus";
       items.push({ key:"TEST", type:"test", cat:"intervalli", title:"12 min soututesti", sub });
@@ -653,9 +671,15 @@ function plannedItems(dISO){
 }
 function planWorkout(dISO, key){ return data.workouts.find(w=>w.date===dISO && w.plan===key); }
 function togglePlanned(dISO, item){
-  const ex = planWorkout(dISO, item.key);
-  if(ex){
-    data.workouts = data.workouts.filter(w=>w!==ex);
+  const pw = planWorkout(dISO, item.key);
+  if(pw){
+    if(!pw.done){
+      pw.done = true;
+    }else if(pw.title===item.title && !pw.note){
+      data.workouts = data.workouts.filter(w=>w!==pw);
+    }else{
+      pw.done = false; // muokattu treeni: kuittaus pois, muokkaus säilyy
+    }
   }else if(item.type==="test"){
     openTestDialog(dISO, item);
     return;
@@ -722,7 +746,8 @@ function renderWeek(){
     const dISO = fmtISO(addDays(weekStart,i));
     plannedItems(dISO).forEach(it=>{
       sums[it.cat].total++;
-      if(planWorkout(dISO, it.key)) sums[it.cat].done++;
+      const pw = planWorkout(dISO, it.key);
+      if(pw && pw.done) sums[it.cat].done++;
     });
     workoutsOn(dISO).filter(w=>!w.plan).forEach(w=>{
       if(!sums[w.cat]) return;
@@ -788,7 +813,8 @@ function renderWeek(){
     // Ohjelman treenit
     plannedItems(dISO).forEach(it=>{
       count++;
-      const done = !!planWorkout(dISO, it.key);
+      const pw = planWorkout(dISO, it.key);
+      const done = !!(pw && pw.done);
       const missed = !done && dISO < tISO;
       const cat = CATS[it.cat];
       const card = document.createElement("div");
@@ -800,11 +826,11 @@ function renderWeek(){
       ico.textContent = cat.emoji;
       card.appendChild(ico);
 
-      const pw = planWorkout(dISO, it.key);
-      const subTxt = (done && pw && pw.note) ? pw.note : it.sub;
+      const title = pw ? pw.title : it.title;
+      const subTxt = (pw && pw.note) ? pw.note : it.sub;
       const info = document.createElement("div");
       info.className = "info";
-      info.innerHTML = '<div class="t">'+esc(it.title)+'</div>'
+      info.innerHTML = '<div class="t">'+esc(title)+'</div>'
         + (subTxt && !it.small ? '<div class="c">'+esc(subTxt)+'</div>' : "")
         + (missed && !it.small ? '<div class="missedtag">jäi väliin</div>' : "");
       card.appendChild(info);
@@ -816,9 +842,13 @@ function renderWeek(){
           chev.className = "chev";
           chev.textContent = "›";
           card.appendChild(chev);
+        }else{
+          info.addEventListener("click", ()=>openPlanDialog(dISO, it));
         }
+      }else if(it.type==="test"){
+        info.addEventListener("click", ()=>{ done ? openPlanDialog(dISO, it) : openTestDialog(dISO, it); });
       }else{
-        info.addEventListener("click", ()=>togglePlanned(dISO, it));
+        info.addEventListener("click", ()=>openPlanDialog(dISO, it));
       }
 
       const chk = document.createElement("button");
@@ -902,6 +932,34 @@ document.getElementById("dlgsave").addEventListener("click", ()=>{
 document.getElementById("dlgdelete").addEventListener("click", ()=>{
   data.workouts = data.workouts.filter(x=>x.id!==dlgState.id);
   save(); dlg.close(); renderWeek();
+});
+
+/* ---------- Ohjelman treenin muokkaus ---------- */
+const plandlg = document.getElementById("plandlg");
+let planDlgState = null;
+function openPlanDialog(dISO, item){
+  planDlgState = { date:dISO, item };
+  const pw = planWorkout(dISO, item.key);
+  document.getElementById("plantitle").textContent = "Muokkaa · "+fmtShort(parseISO(dISO));
+  document.getElementById("planname").value = pw ? pw.title : item.title;
+  document.getElementById("plannote").value = (pw && pw.note) ? pw.note : "";
+  document.getElementById("planreset").style.display = pw ? "block" : "none";
+  plandlg.showModal();
+}
+document.getElementById("plancancel").addEventListener("click", ()=>plandlg.close());
+document.getElementById("plansave").addEventListener("click", ()=>{
+  const s = planDlgState;
+  const title = document.getElementById("planname").value.trim() || s.item.title;
+  const note = document.getElementById("plannote").value.trim();
+  const pw = planWorkout(s.date, s.item.key);
+  if(pw){ pw.title = title; pw.note = note; }
+  else data.workouts.push({ id:uid(), date:s.date, cat:s.item.cat, title, note, done:false, plan:s.item.key });
+  save(); plandlg.close(); renderWeek();
+});
+document.getElementById("planreset").addEventListener("click", ()=>{
+  const s = planDlgState;
+  data.workouts = data.workouts.filter(w=>!(w.date===s.date && w.plan===s.item.key));
+  save(); plandlg.close(); renderWeek();
 });
 
 /* ---------- Soututestin tulosdialogi ---------- */
@@ -1055,8 +1113,10 @@ function finishGym(){
   if(!confirm("Merkitäänkö treeni valmiiksi?")) return;
   data.gymlog.push({ id: ag.id, date: ag.date, planKey: ag.planKey||null, templateId: null, name: ag.name, exercises });
   data.gymlog.sort((a,b)=>a.date<b.date?-1:1);
-  if(ag.planKey && !planWorkout(ag.date, ag.planKey)){
-    data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true, plan: ag.planKey });
+  if(ag.planKey){
+    const pw = planWorkout(ag.date, ag.planKey);
+    if(pw) pw.done = true;
+    else data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true, plan: ag.planKey });
   }
   data.activeGym = null;
   save();
@@ -1655,7 +1715,8 @@ function buildReport(){
       const dISO = fmtISO(addDays(mon,i));
       plannedItems(dISO).forEach(it=>{
         cats[it.cat].suunniteltu++;
-        if(planWorkout(dISO, it.key)) cats[it.cat].tehty++;
+        const pw = planWorkout(dISO, it.key);
+        if(pw && pw.done) cats[it.cat].tehty++;
         else if(dISO < t && it.type!=="check") missed.push(dISO+" "+it.title);
       });
       workoutsOn(dISO).filter(x=>!x.plan && x.done).forEach(x=>{
