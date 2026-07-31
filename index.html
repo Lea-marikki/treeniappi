@@ -136,6 +136,20 @@
   .wcard.resume{border:1.5px solid var(--accent); background:var(--accent-soft); cursor:pointer}
   .restday{color:var(--muted); font-size:13px; padding:1px 4px 4px}
 
+  /* Raahaus: siirrä treeni toiselle päivälle (pitkä painallus) */
+  .wcard.draggable{cursor:grab; touch-action:pan-y}
+  .wcard.dragsource{opacity:.35; outline:2px dashed var(--accent); outline-offset:-2px}
+  .dragghost{
+    position:fixed; z-index:9999; pointer-events:none; margin:0 !important;
+    box-shadow:0 10px 28px rgba(120,100,140,.30); transform:scale(1.03); opacity:.97;
+  }
+  body.dragging-active{user-select:none; -webkit-user-select:none}
+  .day.droptarget{
+    outline:2.5px dashed var(--accent); outline-offset:4px; border-radius:16px;
+    background:var(--accent-soft);
+  }
+  .day.droptarget .dayhead .ddate::after{content:" · pudota tähän"; color:var(--accent); font-weight:700}
+
   /* Cards & weight view */
   .card{
     background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
@@ -582,12 +596,13 @@ function load(){
         if(typeof d.kcalGoal !== "number") d.kcalGoal = 1700;
         if(typeof d.emptyEstimate !== "number") d.emptyEstimate = 2500;
         if(!d.targets || typeof d.targets !== "object") d.targets = {};
+        if(!Array.isArray(d.moves)) d.moves = [];
         return d;
       }
     }
   }catch(e){ console.warn("Load failed", e); }
   return { workouts: [], weights: [], goal: { startKg: PLAN.startKg, goalKg: PLAN.goalKg },
-    templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, emptyEstimate: 2500, targets: {} };
+    templates: [], gymlog: [], activeGym: null, meals: [], kcalGoal: 1700, emptyEstimate: 2500, targets: {}, moves: [] };
 }
 function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -638,7 +653,7 @@ function planWeekOf(dateISO){
   return (diff >= 0 && wk >= 1 && wk <= PLAN.weeks) ? wk : null;
 }
 function phaseOf(wk){ return PLAN.phases.find(p=>wk>=p.from && wk<=p.to) || null; }
-function plannedItems(dISO){
+function baseItems(dISO){
   const wk = planWeekOf(dISO);
   if(!wk) return [];
   const wd = (parseISO(dISO).getDay()+6)%7;
@@ -669,6 +684,21 @@ function plannedItems(dISO){
     sub:"la tai su, 15–30 min" });
   return items;
 }
+// Ohjelman treenit huomioiden käyttäjän raahaukset (data.moves).
+// Kukin siirto: { key, origin (alkuperäinen pvm), to (kohdepvm) }. _origin kertaa mistä kortti on peräisin.
+function plannedItems(dISO){
+  const moves = data.moves || [];
+  const items = baseItems(dISO)
+    .filter(it => !moves.some(m => m.origin===dISO && m.key===it.key && m.to!==dISO))
+    .map(it => Object.assign({}, it, { _origin: dISO }));
+  moves.filter(m => m.to===dISO && m.origin!==dISO).forEach(m=>{
+    const orig = baseItems(m.origin).find(it=>it.key===m.key);
+    if(orig && !items.some(it=>it.key===orig.key)){
+      items.push(Object.assign({}, orig, { _origin: m.origin }));
+    }
+  });
+  return items;
+}
 function planWorkout(dISO, key){ return data.workouts.find(w=>w.date===dISO && w.plan===key); }
 function togglePlanned(dISO, item){
   const pw = planWorkout(dISO, item.key);
@@ -685,6 +715,26 @@ function togglePlanned(dISO, item){
     return;
   }else{
     data.workouts.push({ id:uid(), date:dISO, cat:item.cat, title:item.title, note:"", done:true, plan:item.key });
+  }
+  save(); renderWeek();
+}
+
+/* ---------- Treenin siirto (raahaus) ---------- */
+// dd = { type:'plan'|'extra', key, origin, id, date }
+function applyMove(dd, toDate){
+  const fromDate = dd.date;
+  if(!toDate || toDate === fromDate) return;
+  if(dd.type === "extra"){
+    const w = data.workouts.find(x=>x.id===dd.id);
+    if(w) w.date = toDate;
+  }else{
+    // Poista mahdollinen aiempi siirto samalle ohjelmatreenille ja lisää uusi.
+    data.moves = (data.moves||[]).filter(m=>!(m.key===dd.key && m.origin===dd.origin));
+    if(toDate !== dd.origin){
+      data.moves.push({ id:uid(), key:dd.key, origin:dd.origin, to:toDate });
+    }
+    // Jos treeni oli jo materialisoitu (kuitattu/muokattu), siirrä myös se.
+    data.workouts.forEach(w=>{ if(w.plan===dd.key && w.date===fromDate) w.date = toDate; });
   }
   save(); renderWeek();
 }
@@ -796,6 +846,7 @@ function renderWeek(){
 
     const day = document.createElement("div");
     day.className = "day";
+    day.dataset.date = dISO;
     const head = document.createElement("div");
     head.className = "dayhead" + (isToday?" today":"");
     head.innerHTML = '<span class="dname">'+DAYNAMES[i]+'</span><span class="ddate">'+fmtShort(d)+'</span>'
@@ -857,6 +908,7 @@ function renderWeek(){
       chk.textContent = done ? "✓" : "";
       chk.addEventListener("click", ()=>togglePlanned(dISO, it));
       card.appendChild(chk);
+      makeDraggable(card, { type:"plan", key:it.key, origin:it._origin, date:dISO });
       day.appendChild(card);
     });
 
@@ -881,6 +933,7 @@ function renderWeek(){
       chk.addEventListener("click", ()=>{ w.done = !w.done; save(); renderWeek(); });
       card.appendChild(info);
       card.appendChild(chk);
+      makeDraggable(card, { type:"extra", id:w.id, date:dISO });
       day.appendChild(card);
     });
 
@@ -892,6 +945,122 @@ function renderWeek(){
     }
     daysEl.appendChild(day);
   }
+}
+
+/* ---------- Raahaus: pitkä painallus siirtää treenin toiselle päivälle ---------- */
+const LONGPRESS_MS = 300;
+const MOVE_CANCEL_PX = 10;
+let dragState = null;
+
+function makeDraggable(cardEl, dd){
+  cardEl.classList.add("draggable");
+  cardEl.addEventListener("pointerdown", e=>{
+    if(e.pointerType === "mouse" && e.button !== 0) return;
+    beginPress(e, cardEl, dd);
+  });
+}
+
+function beginPress(e, cardEl, dd){
+  if(dragState) return;
+  const ps = {
+    dd, cardEl, startX:e.clientX, startY:e.clientY, pointerId:e.pointerId,
+    active:false, ghost:null, offX:0, offY:0, targetDay:null, dropDate:null, timer:null
+  };
+  ps.timer = setTimeout(()=>activateDrag(ps), LONGPRESS_MS);
+  dragState = ps;
+
+  ps.onMove = ev=>{
+    if(ev.pointerId !== ps.pointerId) return;
+    if(!ps.active){
+      if(Math.abs(ev.clientX-ps.startX) > MOVE_CANCEL_PX || Math.abs(ev.clientY-ps.startY) > MOVE_CANCEL_PX){
+        cancelPress(ps); // käyttäjä vierittää, ei raahaa
+      }
+      return;
+    }
+    ev.preventDefault();
+    moveGhost(ps, ev.clientX, ev.clientY);
+    updateDropTarget(ps, ev.clientX, ev.clientY);
+    edgeAutoScroll(ev.clientY);
+  };
+  ps.onUp = ev=>{
+    if(ev.pointerId !== ps.pointerId) return;
+    ps.active ? finishDrag(ps, false) : cancelPress(ps);
+  };
+  ps.onCancel = ()=>{ ps.active ? finishDrag(ps, true) : cancelPress(ps); };
+  ps.preventTouch = ev=>{ if(ps.active) ev.preventDefault(); };
+
+  document.addEventListener("pointermove", ps.onMove, {passive:false});
+  document.addEventListener("pointerup", ps.onUp);
+  document.addEventListener("pointercancel", ps.onCancel);
+  document.addEventListener("touchmove", ps.preventTouch, {passive:false});
+}
+
+function activateDrag(ps){
+  ps.active = true;
+  if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
+  const rect = ps.cardEl.getBoundingClientRect();
+  ps.offX = ps.startX - rect.left;
+  ps.offY = ps.startY - rect.top;
+  const ghost = ps.cardEl.cloneNode(true);
+  ghost.classList.add("dragghost");
+  ghost.classList.remove("dragsource");
+  ghost.style.width = rect.width + "px";
+  document.body.appendChild(ghost);
+  ps.ghost = ghost;
+  ps.cardEl.classList.add("dragsource");
+  document.body.classList.add("dragging-active");
+  moveGhost(ps, ps.startX, ps.startY);
+  updateDropTarget(ps, ps.startX, ps.startY);
+}
+
+function moveGhost(ps, x, y){
+  if(!ps.ghost) return;
+  ps.ghost.style.left = (x - ps.offX) + "px";
+  ps.ghost.style.top  = (y - ps.offY) + "px";
+}
+
+function updateDropTarget(ps, x, y){
+  const el = document.elementFromPoint(x, y);
+  const day = el ? el.closest(".day") : null;
+  if(day === ps.targetDay) return;
+  if(ps.targetDay) ps.targetDay.classList.remove("droptarget");
+  ps.targetDay = day;
+  ps.dropDate = day ? day.dataset.date : null;
+  if(day) day.classList.add("droptarget");
+}
+
+function edgeAutoScroll(y){
+  const EDGE = 70, SPEED = 12;
+  if(y < EDGE) window.scrollBy(0, -SPEED);
+  else if(y > window.innerHeight - EDGE) window.scrollBy(0, SPEED);
+}
+
+function cancelPress(ps){ clearTimeout(ps.timer); teardown(ps); }
+
+function finishDrag(ps, cancelled){
+  clearTimeout(ps.timer);
+  const dd = ps.dd, dropDate = ps.dropDate;
+  teardown(ps);
+  suppressNextClick(); // ettei raahauksen päätös kuittaa/avaa korttia
+  if(!cancelled && dropDate) applyMove(dd, dropDate);
+}
+
+function teardown(ps){
+  document.removeEventListener("pointermove", ps.onMove, {passive:false});
+  document.removeEventListener("pointerup", ps.onUp);
+  document.removeEventListener("pointercancel", ps.onCancel);
+  document.removeEventListener("touchmove", ps.preventTouch, {passive:false});
+  if(ps.ghost && ps.ghost.parentNode) ps.ghost.parentNode.removeChild(ps.ghost);
+  if(ps.cardEl) ps.cardEl.classList.remove("dragsource");
+  if(ps.targetDay) ps.targetDay.classList.remove("droptarget");
+  document.body.classList.remove("dragging-active");
+  if(dragState === ps) dragState = null;
+}
+
+function suppressNextClick(){
+  const block = ev=>{ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click", block, true); };
+  document.addEventListener("click", block, true);
+  setTimeout(()=>document.removeEventListener("click", block, true), 400);
 }
 
 /* ---------- Treenidialogi (itse lisätyt) ---------- */
