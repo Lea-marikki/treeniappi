@@ -416,9 +416,9 @@
   <section id="view-more" class="view">
     <div class="card">
       <h2>Edistymisraportti 📊</h2>
-      <p class="muted">Kokoaa syksyn ohjelman toteuman, painot, kalorit ja saliliikkeiden kehityksen yhteen tiedostoon. Kopioi ja liitä Claudelle analysoitavaksi.</p>
+      <p class="muted">Kokoaa syksyn ohjelman toteuman, painot, kalorit ja saliliikkeiden kehityksen yhteen tiedostoon. Liitä tiedosto Claudelle analysoitavaksi.</p>
       <div style="display:flex; gap:8px; margin-top:10px">
-        <button class="btn" id="reportcopy" style="flex:1">Kopioi raportti</button>
+        <button class="btn" id="reportshare" style="flex:1">Jaa raportti</button>
         <button class="btn ghost" id="reportdl" style="flex:1">Lataa tiedosto</button>
       </div>
     </div>
@@ -1923,12 +1923,13 @@ function buildReport(){
     saliliikkeet: sali
   };
 }
-document.getElementById("reportcopy").addEventListener("click", ()=>{
+document.getElementById("reportshare").addEventListener("click", ()=>{
   const txt = JSON.stringify(buildReport(), null, 1);
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt)
-      .then(()=>alert("Raportti kopioitu leikepöydälle. Liitä se Claudelle analysoitavaksi. 📊"))
-      .catch(()=>downloadReport(txt));
+  const file = new File([txt], "habbi-raportti-"+todayISO()+".json", {type:"application/json"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:"Habbi-raportti"}).catch(err=>{
+      if(err && err.name !== "AbortError") downloadReport(txt);
+    });
   }else{
     downloadReport(txt);
   }
