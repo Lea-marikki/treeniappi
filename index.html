@@ -523,9 +523,9 @@ const PLAN = {
 const GYM_PROGRAMS = {
   A: { name:"Sali A · jalat + työntö", exercises:[
     { name:"Kyykky", sets:3, reps:"8–10" },
+    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–12 · 8 kg" },
+    { name:"Pystypunnerrus käsipainoilla", sets:3, reps:"8–12 · 6 kg" },
     { name:"Jalkojen ojennus laitteessa", sets:3, reps:"12" },
-    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–10" },
-    { name:"Pystypunnerrus käsipainoilla", sets:3, reps:"10" },
     { name:"V-vatsat penkillä", sets:3, reps:"10–15" }
   ]},
   B: { name:"Sali B · veto + pakara", exercises:[
@@ -593,7 +593,7 @@ function load(){
         if(!Array.isArray(d.gymlog)) d.gymlog = [];
         if(!("activeGym" in d)) d.activeGym = null;
         if(!Array.isArray(d.meals)) d.meals = [];
-        if(typeof d.kcalGoal !== "number") d.kcalGoal = 1700;
+        d.kcalGoal = 1700; // lukittu suunnitelmaan
         if(typeof d.emptyEstimate !== "number") d.emptyEstimate = 2500;
         if(!d.targets || typeof d.targets !== "object") d.targets = {};
         if(!Array.isArray(d.moves)) d.moves = [];
@@ -1818,47 +1818,40 @@ function avgKcal(days){
   }
   return n ? { avg: Math.round(sum/n), n } : null;
 }
-function ruleBar(label, pct, target, higherBetter){
-  const good = higherBetter ? pct>=target : pct<=target;
-  const col = good ? "var(--green)" : "var(--red)";
-  const w = Math.max(2, Math.min(100, pct));
-  return '<div class="rrow"><div class="rlab"><span>'+label+'</span><span style="color:'+col+'">'+pct+' %</span></div>'
-    + '<div class="rbar"><div class="rfill" style="width:'+w+'%; background:'+col+'"></div>'
-    + '<div class="rtarget" style="left:'+target+'%"></div></div>'
-    + '<div class="rgoal">tavoite '+(higherBetter?"vähintään ":"enintään ")+target+' %</div></div>';
+function weekBalance(monday){
+  const totals = kcalTotals(), first = firstMealDate(), goal = data.kcalGoal, t = todayISO();
+  let saldo=0, arki=0, vkl=0, n=0, est=0;
+  for(let i=0;i<7;i++){
+    const dISO = fmtISO(addDays(monday,i));
+    if(dISO >= t) continue; // vain täydet päivät
+    const d = dayInfo(dISO, totals, first);
+    if(!d) continue;
+    const diff = d.tot - goal;
+    saldo += diff; n++;
+    if(d.est) est++;
+    if(i<5) arki += diff; else vkl += diff;
+  }
+  return { saldo, arki, vkl, n, est };
+}
+function fmtSaldo(v){ return (v>0?"+":"")+Math.round(v); }
+function balanceRow(label, b){
+  if(!b.n){
+    return '<div class="cprow"><span class="cpw">'+label+'</span><span class="cpt">ei täysiä päiviä vielä</span></div>';
+  }
+  const ok = b.saldo <= 0;
+  return '<div class="cprow"><span class="cpw">'+label+'</span>'
+    + '<span class="cpt">arki '+fmtSaldo(b.arki)+' · vkl '+fmtSaldo(b.vkl)+(b.est ? ' · '+b.est+' arviopv' : '')+'</span>'
+    + '<span class="cpa '+(ok?"ok":"behind")+'">'+fmtSaldo(b.saldo)+' kcal</span></div>';
 }
 function renderRule(){
   const el = document.getElementById("rulecard");
-  const goal = data.kcalGoal, totals = kcalTotals(), first = firstMealDate();
-  let ok=0, counted=0, estDays=0, overSum=0, overDays=0, treatKcal=0, allKcal=0;
-  for(let i=1;i<=30;i++){
-    const d = dayInfo(fmtISO(addDays(new Date(), -i)), totals, first);
-    if(!d) continue;
-    counted++;
-    if(d.est) estDays++;
-    allKcal += d.tot;
-    if(d.tot <= goal) ok++;
-    else { overDays++; overSum += d.tot-goal; }
-  }
-  const today = parseISO(todayISO());
-  data.meals.forEach(m=>{
-    const diff = (today - parseISO(m.date))/(24*3600*1000);
-    if(m.treat && diff>=1 && diff<=30) treatKcal += m.kcal;
-  });
-  let html = '<h2>80/20-seuranta · 30 pv ⚖️</h2>';
-  if(!counted){
-    el.innerHTML = html + '<div class="empty-note">Kertyy, kun kirjauksia on.</div>';
-    return;
-  }
-  const okPct = Math.round(ok/counted*100);
-  const treatPct = allKcal ? Math.round(treatKcal/allKcal*100) : 0;
-  html += ruleBar("Päivät tavoitteessa", okPct, 80, true)
-    + ruleBar("Herkkujen osuus kaloreista", treatPct, 20, false)
-    + '<p class="muted" style="margin:10px 0 0">'
-    + (overDays ? "Ylityspäiviä "+overDays+"/"+counted+", keskimäärin +"+Math.round(overSum/overDays)+" kcal ylitys. " : "Ei yhtään ylityspäivää. 🎉 ")
-    + (estDays ? estDays+" päivää ilman kirjauksia laskettu arviolla "+data.emptyEstimate+" kcal. " : "")
-    + (okPct>=80 ? "80/20 toteutuu — juuri sopivasti joustoa!" : "8 päivää kymmenestä tavoitteessa riittää.")
-    + '</p>';
+  const thisMon = mondayOf(new Date());
+  const cur = weekBalance(thisMon);
+  const prev = weekBalance(addDays(thisMon,-7));
+  let html = '<h2>Viikkosaldo ⚖️</h2>'
+    + '<p class="muted" style="margin:0 0 4px">Täydet päivät vs. '+data.kcalGoal+' kcal/pv — miinus on alijäämää eli hyvä.</p>'
+    + balanceRow("Tämä viikko", cur)
+    + balanceRow("Viime viikko", prev);
   const a7 = avgKcal(7), a30 = avgKcal(30);
   if(a7 || a30){
     html += '<div class="stats" style="margin:12px 0 0">';
@@ -1901,8 +1894,9 @@ function buildReport(){
     const info = dayInfo(fmtISO(d), totals, first);
     if(info) kcalDays.push({ pvm:fmtISO(d), kcal:info.tot, arvio:info.est||undefined });
   }
-  const herkut = data.meals.filter(m=>m.treat && m.date>=PLAN.start)
-    .map(m=>({ pvm:m.date, nimi:m.name||"herkku", kcal:m.kcal }));
+  const ateriat = data.meals.filter(m=>m.date>=PLAN.start)
+    .map(m=>({ pvm:m.date, nimi:m.name||"", kcal:m.kcal, herkku:m.treat||undefined }))
+    .sort((a,b)=>a.pvm<b.pvm?-1:1);
   const sali = {};
   data.gymlog.forEach(g=>g.exercises.forEach(e=>{
     let top = null;
@@ -1919,7 +1913,7 @@ function buildReport(){
     treeniviikot: weeks,
     soututestit: data.workouts.filter(w=>w.plan==="TEST" && w.done).map(w=>({ pvm:w.date, tulos:w.note })),
     kaloripaivat: kcalDays,
-    herkut,
+    ateriat,
     saliliikkeet: sali
   };
 }
@@ -2007,7 +2001,6 @@ document.getElementById("importfile").addEventListener("change", e=>{
           d.meals.forEach(m=>bm.set(m.id,m));
           data.meals = [...bm.values()];
         }
-        if(typeof d.kcalGoal === "number") data.kcalGoal = d.kcalGoal;
         if(typeof d.emptyEstimate === "number") data.emptyEstimate = d.emptyEstimate;
         save(); renderWeek(); renderWeight(); renderMore(); renderFood();
         alert("Tiedot tuotu ja yhdistetty.");
