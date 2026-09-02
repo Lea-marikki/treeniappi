@@ -507,65 +507,60 @@
 
 /* ---------- Syksyn 2026 ohjelma ---------- */
 const PLAN = {
-  start: "2026-07-27", weeks: 18, startKg: 75, goalKg: 67,
+  start: "2026-07-27", weeks: 21, startKg: 75, goalKg: 68,
   phases: [
     { from:1,  to:4,  name:"Pohja" },
     { from:5,  to:9,  name:"Rakennus" },
     { from:10, to:14, name:"Teho" },
-    { from:15, to:18, name:"Viimeistely" }
+    { from:15, to:21, name:"Viimeistely" }
   ],
   interval: { title:"Intervallit: 4 × 3 min / 2 min palautus", sub:"kuntopyörä · 5 min kevyt alkuun ja loppuun · ~32 min" },
   deload: [4,9,14,18],
-  tests: [1,9,18],
-  checkpoints: [ {week:4,kg:73}, {week:9,kg:71}, {week:14,kg:69}, {week:18,kg:67} ],
-  targets: { intervalli:1, lihaskunto:3, liikkuvuus:1, peruskestavyys:1 }
+  tests: [1,9,21],
+  checkpoints: [ {week:9,kg:73}, {week:14,kg:71}, {week:18,kg:69.5}, {week:21,kg:68} ],
+  targets: { intervalli:2, lihaskunto:2, liikkuvuus:1, peruskestavyys:2 }
 };
 const GYM_PROGRAMS = {
   A: { name:"Sali A · jalat + työntö", exercises:[
-    { name:"Kyykky", sets:3, reps:"8–10" },
-    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–12 · 8 kg" },
-    { name:"Pystypunnerrus käsipainoilla", sets:3, reps:"8–12 · 6 kg" },
+    { name:"Wall ball", sets:4, reps:"12–15" },
+    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–12 · 10 kg" },
+    { name:"Hip thrust laitteessa", sets:3, reps:"10–12" },
     { name:"Jalkojen ojennus laitteessa", sets:3, reps:"12" },
     { name:"V-vatsat penkillä", sets:3, reps:"10–15" }
   ]},
   B: { name:"Sali B · veto + pakara", exercises:[
-    { name:"Romanialainen maastaveto", sets:3, reps:"8–10" },
+    { name:"Jalkaprässi", sets:3, reps:"10–12" },
     { name:"Alatalja", sets:3, reps:"10" },
     { name:"Ylätalja", sets:3, reps:"10" },
+    { name:"Pakara-ojennus selkäpenkissä", sets:3, reps:"12–15" },
     { name:"Loitontajat laitteessa", sets:3, reps:"12–15" },
     { name:"Lähentäjät laitteessa", sets:3, reps:"12–15" },
     { name:"Kuollut kuoriainen", sets:2, reps:"10/puoli" }
-  ]},
-  C: { name:"Sali C · koko keho", exercises:[
-    { name:"Jalkaprässi", sets:3, reps:"12" },
-    { name:"Ylätalja", sets:3, reps:"10" },
-    { name:"Hip thrust laitteessa", sets:3, reps:"10–12" },
-    { name:"Punnerrus lattialla", sets:3, reps:"max" },
-    { name:"Kylkilankku", sets:3, reps:"30 s/puoli" }
   ]}
 };
 const MEAL_PLAN = [
   { id:"aamupala",    name:"Aamupala",    time:"~7.00",  options:[
-    { name:"Mustikkasmoothie", kcal:355, desc:"2½ dl maitoa · 30 g proteiinijauhetta · 1½ dl mustikoita · ½ dl kaurahiutaleita · 1 rkl chiaa" },
-    { name:"Ruisleivät + kalkkuna + muna", kcal:340, desc:"2 ruisleipää · sulatejuusto · 80 g kalkkunaa · keitetty muna" }
+    { name:"Marjasmoothie", kcal:355, desc:"2½ dl maitoa · 30 g proteiinijauhetta · 1½ dl mustikoita tai mansikoita · ½ dl kaurahiutaleita · 1 rkl chiaa" },
+    { name:"Ruisleivät + kananmuna", kcal:340, desc:"2 ruisleipää · sulatejuusto · kalkkunaa · keitetty muna" }
   ]},
   { id:"lounas",      name:"Lounas",      time:"~11.30", options:[
-    { name:"Kanawokki", kcal:450, desc:"130 g kanaa · kasviksia · 60 g riisiä tai nuudelia (kuivapaino)" },
-    { name:"Pastasalaatti kanalla", kcal:455, desc:"70 g täysjyväpastaa (kuivapaino) · 120 g kanaa · kasviksia · kevytdressing" }
+    { name:"Kanawokki tai -pasta", kcal:450, desc:"130 g kanaa · kasviksia · riisiä tai pastaa" },
+    { name:"Salaatti", kcal:400, desc:"runsas salaatti + proteiini" },
+    { name:"Lounaspöytä", kcal:500, desc:"lautasmalli: ½ kasviksia · ¼ proteiinia · ¼ lisäkettä" }
   ]},
   { id:"valipala",    name:"Välipala",    time:"~15.00", options:[
-    { name:"Hedelmä + proteiinipirtelö", kcal:165, desc:"1 hedelmä · 30 g proteiinijauhetta veteen" },
-    { name:"Vaniljakeso", kcal:135, desc:"150 g" }
+    { name:"Valio proteiinipirtelö", kcal:180, desc:"valmisjuoma" },
+    { name:"Kreikkalainen jugurtti + höysteet", kcal:150, desc:"150 g 2 % · marjat, mango tai mysli" }
   ]},
   { id:"paivallinen", name:"Päivällinen", time:"~17.30", options:[
-    { name:"Uunikasvikset + jauheliha", kcal:390, desc:"300 g kasviksia · 150 g jauhelihaa (5–7 %)" },
-    { name:"Jauhelihakeitto", kcal:400, desc:"iso annos · ~120 g jauhelihaa" },
-    { name:"Nuudelikeitto kanalla", kcal:375, desc:"50 g nuudelia (kuivapaino) · 100 g kanaa · kasviksia" },
-    { name:"Tortillat", kcal:490, desc:"2 kpl · 100 g jauhelihaa · juustoraaste · kasvikset · salsa" }
+    { name:"Keitto", kcal:400, desc:"esim. tomaatti-feta tai jauhelihakeitto · iso annos + leipä" },
+    { name:"Uunikasvikset + liha", kcal:450, desc:"300 g kasviksia · ~175 g lihaa" },
+    { name:"Pasta", kcal:500, desc:"tonnikala, kana tai lohi · 70 g pastaa (kuivapaino) · kasviksia" },
+    { name:"Tortillat", kcal:450, desc:"2 kpl täytteineen" }
   ]},
   { id:"iltapala",    name:"Iltapala",    time:"~20.30", options:[
-    { name:"Kreikkalainen jogurtti + marjat", kcal:140, desc:"150 g Coop 2 % · marjoja" },
-    { name:"Kreikkalainen jogurtti + mangosose", kcal:135, desc:"150 g Coop 2 % · 50 g mangososetta" }
+    { name:"Kreikkalainen jugurtti + höysteet", kcal:150, desc:"150 g 2 % · marjat, mango tai mysli" },
+    { name:"Prodevanukas", kcal:250, desc:"vanukas + pieni lisä" }
   ]}
 ];
 
@@ -660,7 +655,7 @@ function baseItems(dISO){
   const deload = PLAN.deload.includes(wk);
   const items = [];
   if(wd===0) items.push({ key:"A", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.A.name,
-    sub: deload ? "kevennys: −30 % kuormista" : "kyykky + laitteet" });
+    sub: deload ? "kevennys: −30 % kuormista" : "wall ball + laitteet" });
   if(wd===1){
     if(PLAN.tests.includes(wk)){
       let sub = "soutulaite: lämmittely 10 min + 12 min täysillä · kirjaa matka";
@@ -674,12 +669,14 @@ function baseItems(dISO){
       items.push({ key:"INT", type:"check", cat:"intervalli", title:PLAN.interval.title, sub:PLAN.interval.sub });
     }
   }
-  if(wd===2) items.push({ key:"B", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.B.name,
-    sub: deload ? "kevennys: −30 % kuormista" : "RDL + laitteet" });
-  if(wd===3) items.push({ key:"PK", type:"check", cat:"peruskestavyys",
-    title: deload ? "Kevyt soutu 30 min" : "Tasasoutu 45 min", sub:"rauhallinen, puhekelpoinen" });
-  if(wd===4) items.push({ key:"C", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.C.name,
-    sub:"laitepäivä, kevyempi" });
+  if(wd===2) items.push({ key:"PADEL", type:"check", cat:"peruskestavyys", title:"Padel", sub:"iltavuoro" });
+  if(wd===3) items.push({ key:"B", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.B.name,
+    sub: deload ? "kevennys: −30 % kuormista" : "laitteet, selkäystävällinen" });
+  if(wd===4) items.push({ key:"KAV", type:"check", cat:"peruskestavyys", title:"Kävelykardio 40–60 min",
+    sub:"esim. työmatka kävellen" });
+  if(wd===5) items.push({ key:"INT2", type:"check", cat:"intervalli",
+    title: deload ? "Kevyt lenkki 30 min" : "Intervallit 2: pyörä, soutu tai mäkikävely",
+    sub: deload ? "kevennysviikko" : "4 × 3 min / 2 min · missä vaan" });
   if(wd===6) items.push({ key:"MOB", type:"check", cat:"liikkuvuus", title:"Jooga tai venyttely",
     sub:"la tai su, 15–30 min" });
   return items;
@@ -778,7 +775,7 @@ function renderPhaseBanner(){
   const cp = PLAN.checkpoints.find(c=>c.week===wk);
   if(cp) badges += '<span class="pbadge">🎯 Välitavoite '+String(cp.kg).replace(".",",")+' kg</span>';
   el.innerHTML = '<div class="phase"><div class="pmain">Ohjelmaviikko '+wk+'/'+PLAN.weeks+' · '+ph.name+'</div>'
-    + '<div class="psub">Syksy 2026: 75 → 67 kg · lihaskunto · VO2max</div>'
+    + '<div class="psub">75 → 68 kg jouluun · lihaskunto · VO2max</div>'
     + (badges ? '<div>'+badges+'</div>' : "")
     + '</div>';
 }
@@ -1906,11 +1903,13 @@ function buildReport(){
   }));
   return {
     luotu: t,
-    ohjelma: "Syksy 2026 (27.7.–29.11.), viikko " + (wk || "ohjelman ulkopuolella") + "/" + PLAN.weeks,
+    ohjelma: "Syksy 2026 (27.7.–20.12.), viikko " + (wk || "ohjelman ulkopuolella") + "/" + PLAN.weeks,
     tavoitteet: { alkupaino: PLAN.startKg, tavoitepaino: PLAN.goalKg, kcalPaivassa: data.kcalGoal },
     checkpointit: PLAN.checkpoints.map(cp=>({ vko:cp.week, pvm:fmtISO(addDays(planMonday(cp.week),4)), tavoiteKg:cp.kg })),
     painot: data.weights,
     treeniviikot: weeks,
+    muutTreenit: data.workouts.filter(w=>!w.plan && w.done && w.date>=PLAN.start)
+      .map(w=>({ pvm:w.date, nimi:w.title||w.cat, kategoria:w.cat })),
     soututestit: data.workouts.filter(w=>w.plan==="TEST" && w.done).map(w=>({ pvm:w.date, tulos:w.note })),
     kaloripaivat: kcalDays,
     ateriat,
