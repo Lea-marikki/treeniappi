@@ -46,7 +46,7 @@ check("planWeekOf: 27.7. on vko 1", g.planWeekOf("2026-07-27") === 1);
 check("planWeekOf: 29.11. on vko 18", g.planWeekOf("2026-11-29") === 18);
 check("planWeekOf: 20.12. on vko 21 (jatkettu jouluun)", g.planWeekOf("2026-12-20") === 21);
 check("planWeekOf: 26.7. ei ohjelmassa", g.planWeekOf("2026-07-26") === null);
-check("planWeekOf: 21.12. ei ohjelmassa", g.planWeekOf("2026-12-21") === null);
+check("planWeekOf: 1.2.2027 ei ohjelmassa (v4: jatkettu 31.1. asti)", g.planWeekOf("2027-02-01") === null);
 // v1 (vk 1–5): ei päiväkohtaista runkoa
 check("v1: vk 1 ma ei ohjelmakortteja", g.plannedItems("2026-07-27").length === 0);
 // v2 (vk 6–9)
@@ -82,14 +82,14 @@ check("Vk 15 ke: matkapäivä, ei padelia", g.plannedItems("2026-11-04").length 
 check("Vk 15 to ja la: kävely kaupungilla", g.plannedItems("2026-11-05")[0].cat === "peruskestavyys" && g.plannedItems("2026-11-07")[0].title.includes("Kävely"));
 check("Vk 15 la: ei salia", !g.plannedItems("2026-11-07").some(i=>i.type==="gym"));
 check("Vk 15 su: venyttely hotellilla", g.plannedItems("2026-11-08")[0].title.includes("Venyttely"));
-// vk 19 kevennys, vk 21 testi
-check("Vk 19 ma: kevennys", g.plannedItems("2026-11-30")[0].sub.includes("kevennys"));
-check("Vk 19 la: kevyt tasavauhti", g.plannedItems("2026-12-05")[1].title.includes("Kevyt tasavauhti"));
-check("Vk 21 ti: soututesti", g.plannedItems("2026-12-15")[0].key === "TEST");
+// v4 (10.11.): vk 19 ei enää kevennys, vk 21 testi perjantaina
+check("Vk 19 ma: ei kortteja (v4 jousto)", g.plannedItems("2026-11-30").length === 0);
+check("Vk 19 su: koko kropan sali ilman kevennystä", g.plannedItems("2026-12-06")[0].key === "S" && !g.plannedItems("2026-12-06")[0].sub.includes("kevennys"));
+check("Vk 21 pe: soututesti", g.plannedItems("2026-12-18")[0].key === "TEST");
 
 // 3. Viikkonäkymä ohjelmaviikolla 6
 g.setWeek("2026-08-31");
-check("Banneri: Ohjelmaviikko 1/21 · Pohja", doc.getElementById("phasebanner").textContent.includes("Ohjelmaviikko 6/21")
+check("Banneri: Ohjelmaviikko 6/27 · Rakennus", doc.getElementById("phasebanner").textContent.includes("Ohjelmaviikko 6/27")
   && doc.getElementById("phasebanner").textContent.includes("Rakennus"));
 check("Sali A -kortti maanantaina", doc.getElementById("days").textContent.includes("Sali A"));
 check("Ei koiralenkkikortteja", !doc.getElementById("days").textContent.includes("Koiralenkki"));
@@ -121,7 +121,7 @@ doc.getElementById("testkm").value = "2450";
 doc.getElementById("testsave").click();
 check("Testitulos tallentui (2450 m)", g.planWorkout("2026-09-22","TEST") && g.planWorkout("2026-09-22","TEST").note === "2450 m");
 check("Tulos näkyy kortissa", [...doc.querySelectorAll("#days .wcard")].find(c=>c.textContent.includes("soututesti")).textContent.includes("2450 m"));
-const tue21 = g.plannedItems("2026-12-15");
+const tue21 = g.plannedItems("2026-12-18"); // v4: testi perjantaina
 check("Vko 21 testi näyttää edellisen tuloksen", tue21[0].key === "TEST" && tue21[0].sub.includes("2450 m"));
 g.setWeek("2026-08-31");
 check("Raportissa soututestit", g.buildReport().soututestit.length === 1 && g.buildReport().soututestit[0].tulos === "2450 m");
@@ -181,7 +181,7 @@ discardBtn.click();
 check("Hylkäys palauttaa viikkoon", doc.getElementById("view-week").classList.contains("active") && !store().activeGym);
 
 // 7. Ohjelman ulkopuolinen viikko
-g.setWeek("2027-01-04");
+g.setWeek("2027-02-01");
 check("Ei banneria ohjelman jälkeen", doc.getElementById("phasebanner").innerHTML === "");
 check("Lepopäivät näkyvät", doc.getElementById("days").textContent.includes("Lepopäivä"));
 

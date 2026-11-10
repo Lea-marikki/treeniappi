@@ -101,7 +101,7 @@ check("Paino tallentui tälle päivälle", w.length===1 && w[0].date===iso(0) &&
 check("Tavoitekortti 75→68 ilman muokkausta", doc.getElementById("goalcard").textContent.includes("75,0 kg")
   && doc.getElementById("goalcard").textContent.includes("68,0 kg")
   && !doc.getElementById("goalcard").textContent.includes("Muokkaa"));
-check("4 checkpointia", doc.querySelectorAll("#cpcard .cprow").length === 4);
+check("5 checkpointia", doc.querySelectorAll("#cpcard .cprow").length === 5);
 check("Checkpoint vk 9 pe 25.9.", doc.getElementById("cpcard").textContent.includes("Vko 9 · 25.9."));
 check("Viimeinen checkpoint vk 21 pe 18.12. (68 kg)", doc.getElementById("cpcard").textContent.includes("Vko 21 · 18.12.")
   && doc.getElementById("cpcard").textContent.includes("68 kg"));
@@ -117,7 +117,7 @@ check("Ei punnitusta ikkunassa → null", none === null);
 // 9. Raportti
 const r = g.buildReport();
 check("Raportissa tavoitteet", r.tavoitteet.alkupaino===75 && r.tavoitteet.tavoitepaino===68 && r.tavoitteet.kcalPaivassa===1700);
-check("Raportissa 4 checkpointia oikeilla päivillä", r.checkpointit.length===4 && r.checkpointit[0].pvm==="2026-09-25" && r.checkpointit[3].pvm==="2026-12-18");
+check("Raportissa 5 checkpointia oikeilla päivillä", r.checkpointit.length===5 && r.checkpointit[0].pvm==="2026-09-25" && r.checkpointit[3].pvm==="2026-12-18" && r.checkpointit[4].pvm==="2027-01-29");
 check("Raportissa painot mukana", Array.isArray(r.painot) && r.painot.length===1);
 check("Raportissa saliliikkeet-objekti", typeof r.saliliikkeet === "object");
 check("Raportissa ateriat nimineen", Array.isArray(r.ateriat) && r.ateriat.some(m=>m.nimi==="työpaikkalounas" && m.kcal===550));

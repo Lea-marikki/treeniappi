@@ -121,14 +121,14 @@ setTimeout(()=>{
 
   // 7. Raportti
   const r = g.buildReport();
-  check("Raportissa ohjelmaversiot", r.ohjelmaversiot.length===3 && r.ohjelmaversiot[0].tavoitteet.lihaskunto===3);
+  check("Raportissa ohjelmaversiot", r.ohjelmaversiot.length===4 && r.ohjelmaversiot[0].tavoitteet.lihaskunto===3);
   check("Raportin vk 1: versio v1, lihaskunto 3/3", r.treeniviikot[0].ohjelmaversio==="v1" && r.treeniviikot[0].treenit.lihaskunto.tehty===3 && r.treeniviikot[0].treenit.lihaskunto.tavoite===3);
   check("Raportin viikoilla tehtyjen lista", r.treeniviikot[0].tehdyt.some(d=>d.nimi==="Sali C"));
   check("Väliin jääneissä myös muut kuin sali", r.treeniviikot.some(w=>(w.valiin||[]).some(m=>m.kategoria!=="lihaskunto")));
   check("Raportissa siirrot", r.siirrot.some(s=>s.alkuperainen==="2026-09-24" && s.siirretty==="2026-09-27"));
   check("Saliliikkeissä kaikki sarjat ja muistiinpano", r.saliliikkeet["Wall ball"][0].sarjat==="4×14, 4×12" && r.saliliikkeet["Wall ball"][0].muistiinpano==="raskas");
   check("Raportin vk 9 herkut 400 kcal", r.treeniviikot[8].herkutKcal===400);
-  check("Raportissa kevennykset 4, 9, 15, 19 ja matka", r.kevennysviikot.join(",")==="4,9,15,19" && r.matkat[0].nimi==="Edinburgh");
+  check("Raportissa kevennykset 4, 9, 15 ja matkat", r.kevennysviikot.join(",")==="4,9,15" && r.matkat[0].nimi==="Edinburgh" && r.matkat[1].nimi==="Joulu");
   check("Raportti ei väitä ohjelman loppuvan 29.11.", !JSON.stringify(r).includes("29.11"));
 
   // 8. Tallennusvirhe näkyy käyttäjälle
