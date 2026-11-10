@@ -462,6 +462,10 @@
 <!-- Treenidialogi (ylimääräiset treenit) -->
 <dialog id="wdialog">
   <h3 id="dlgtitle">Lisää treeni</h3>
+  <div class="field" id="presetfield">
+    <label>Pikavalinta</label>
+    <div class="catpick" id="presetpick"></div>
+  </div>
   <div class="field">
     <label>Kategoria</label>
     <div class="catpick" id="catpick"></div>
@@ -475,6 +479,7 @@
     <input type="text" id="dlgnote" placeholder="esim. reitti, fiilis">
   </div>
   <label class="donetoggle"><input type="checkbox" id="dlgdone"> Tehty ✓</label>
+  <button class="btn ghost" id="dlggym" style="display:none; width:100%; margin-top:8px">🏋️ Kirjaa liikkeet ja sarjat ›</button>
   <div class="dlgactions">
     <button class="btn danger" id="dlgdelete" style="display:none">Poista</button>
     <button class="btn ghost" id="dlgcancel">Peruuta</button>
@@ -517,25 +522,30 @@
 <script>
 "use strict";
 
-/* ---------- Syksyn 2026 ohjelma ---------- */
+/* ---------- Syksy–talvi 2026–27 ohjelma (v4 10.11.: jatkettu 31.1.2027 asti) ---------- */
 const PLAN = {
-  start: "2026-07-27", weeks: 21, startKg: 75, goalKg: 68,
+  start: "2026-07-27", weeks: 27, startKg: 75, goalKg: 68,
   phases: [
     { from:1,  to:4,  name:"Pohja" },
     { from:5,  to:9,  name:"Rakennus" },
     { from:10, to:14, name:"Teho" },
-    { from:15, to:21, name:"Viimeistely" }
+    { from:15, to:15, name:"Viimeistely" },
+    { from:16, to:27, name:"Jousto" }
   ],
   interval: { title:"Intervallit: 4 × 3 min / 2 min palautus", sub:"kuntopyörä · 5 min kevyt alkuun ja loppuun · ~32 min" },
-  // Kevennykset siirretty 26.9.: vk 14 → 15 (Edinburgh) ja vk 18 → 19
-  deload: [4,9,15,19],
+  // Kevennykset: vk 14 → 15 (Edinburgh) 26.9.; vk 19 poistettu 10.11. (v4, treenimäärä pieni)
+  deload: [4,9,15],
   tests: [1,9,21],
-  checkpoints: [ {week:9,kg:73}, {week:14,kg:71}, {week:18,kg:69.5}, {week:21,kg:68} ],
+  checkpoints: [ {week:9,kg:73}, {week:14,kg:71}, {week:18,kg:71}, {week:21,kg:70}, {week:27,kg:68} ],
   cpTolerance: 0.5, // ±0,5 kg = tavoitteessa
-  targets: { intervalli:2, lihaskunto:2, liikkuvuus:1, peruskestavyys:2 },
+  targets: { intervalli:1, lihaskunto:2, liikkuvuus:1, peruskestavyys:0 },
   // Matkaviikot: päivät from–to ilman normaalia ohjelmaa
   travel: [ { week:15, name:"Edinburgh", from:"2026-11-04", to:"2026-11-08",
-    targets:{ intervalli:1, lihaskunto:1, liikkuvuus:1, peruskestavyys:2 } } ],
+    targets:{ intervalli:1, lihaskunto:1, liikkuvuus:1, peruskestavyys:2 },
+    note:"Matkalla kävely = peruskestävyys ja venyttely = liikkuvuus. Ei salia — viikko on silti tavoitteessa." },
+    { week:22, name:"Joulu", from:"2026-12-24", to:"2026-12-27", holiday:true,
+    targets:{ intervalli:0, lihaskunto:1, liikkuvuus:0, peruskestavyys:0 },
+    note:"Joulu reissussa 24.–27.12.: ei treenejä eikä kalorilaskentaa. Ma–ke voi tehdä yhden salin tai tunnin." } ],
   treatWeekBudget: 1200, treatDayGuide: 170
 };
 // Ohjelmaversiot päivämäärän mukaan. Menneet viikot näytetään ja raportoidaan
@@ -547,9 +557,12 @@ const PLAN_VERSIONS = [
   { id:"v2", from:"2026-08-31", to:"2026-09-27", schedule:"v2",
     targets:{ intervalli:2, lihaskunto:2, liikkuvuus:1, peruskestavyys:2 },
     desc:"Vk 6 revisio 2.9.: ma A · ti intervallit · ke padel · to B · pe kävely · la intervallit 2 · su jooga." },
-  { id:"v3", from:"2026-09-28", to:"2026-12-20", schedule:"v3",
+  { id:"v3", from:"2026-09-28", to:"2026-11-08", schedule:"v3",
     targets:{ intervalli:2, lihaskunto:2, liikkuvuus:1, peruskestavyys:2 },
-    desc:"26.9. päivitys: ma A · ti intervallit sisällä · ke padel · to puskuripäivä · pe kävely · la B + intervallit 2 · su jooga/venyttely." }
+    desc:"26.9. päivitys: ma A · ti intervallit sisällä · ke padel · to puskuripäivä · pe kävely · la B + intervallit 2 · su jooga/venyttely." },
+  { id:"v4", from:"2026-11-09", to:"2027-01-31", schedule:"v4",
+    targets:{ intervalli:1, lihaskunto:2, liikkuvuus:1, peruskestavyys:0 },
+    desc:"10.11. joustoviikko: ankkurit pe 7:00 spinning ja su koko kropan sali; lihaskuntatunnit, vapaa sali, jooga ja muut vapaasti. Minimi su sali + 1 muu. Padel ja PK-tavoite pois, tavoite lihasmassan ylläpito." }
 ];
 const GYM_PROGRAMS = {
   A: { name:"Sali A · jalat + työntö", exercises:[
@@ -567,6 +580,16 @@ const GYM_PROGRAMS = {
     { name:"Loitontajat laitteessa", sets:3, reps:"12–15 · 70–72,5 kg" },
     { name:"Lähentäjät laitteessa", sets:3, reps:"12–15 · 26 kg" },
     { name:"Kuollut kuoriainen", sets:2, reps:"10/puoli" }
+  ]},
+  S: { name:"Sali · koko kroppa", exercises:[
+    { name:"Jalkaprässi", sets:3, reps:"10–12 · 100 kg" },
+    { name:"Hip thrust laitteessa", sets:3, reps:"10–12 · 37,5 kg" },
+    { name:"Ylätalja", sets:3, reps:"10 · 42,5 kg" },
+    { name:"Käsipainopunnerrus penkillä", sets:3, reps:"8–12 · 12,5 kg" },
+    { name:"V-vatsat penkillä", sets:3, reps:"12 · punnerruksen kanssa vuorotellen" },
+    { name:"Alatalja", sets:3, reps:"10 · 42,5 kg" },
+    { name:"Loitontajat laitteessa", sets:2, reps:"12–15 · 67,5 kg · jos aikaa" },
+    { name:"Lähentäjät laitteessa", sets:2, reps:"12–15 · 26 kg · jos aikaa" }
   ]}
 };
 const MEAL_PLAN = [
@@ -718,14 +741,15 @@ function weekTargets(wk){
   const v = versionOf(fmtISO(planMonday(wk)));
   return v ? v.targets : PLAN.targets;
 }
+function testItem(dISO){
+  let tsub = "soutulaite: lämmittely 10 min + 12 min täysillä · kirjaa matka";
+  const prev = data.workouts.filter(w=>w.plan==="TEST" && w.done && w.note && w.date<dISO)
+    .sort((a,b)=>a.date<b.date?-1:1).pop();
+  if(prev) tsub = "edellinen: "+prev.note+" · sama vastus";
+  return { key:"TEST", type:"test", cat:"intervalli", title:"12 min soututesti", sub:tsub };
+}
 function intervalTuesday(wk, dISO, deload, sub){
-  if(PLAN.tests.includes(wk)){
-    let tsub = "soutulaite: lämmittely 10 min + 12 min täysillä · kirjaa matka";
-    const prev = data.workouts.filter(w=>w.plan==="TEST" && w.done && w.note && w.date<dISO)
-      .sort((a,b)=>a.date<b.date?-1:1).pop();
-    if(prev) tsub = "edellinen: "+prev.note+" · sama vastus";
-    return { key:"TEST", type:"test", cat:"intervalli", title:"12 min soututesti", sub:tsub };
-  }
+  if(PLAN.tests.includes(wk)) return testItem(dISO);
   if(deload) return { key:"INT", type:"check", cat:"intervalli", title:"Kevyt pyöräily 20 min", sub:"kevennysviikko" };
   return { key:"INT", type:"check", cat:"intervalli", title:PLAN.interval.title, sub: sub || PLAN.interval.sub };
 }
@@ -769,8 +793,18 @@ function itemsV3(wk, wd, dISO){
   if(wd===6) items.push({ key:"MOB", type:"check", cat:"liikkuvuus", title:"Jooga tai venyttely", sub:"15–30 min" });
   return items;
 }
-// Matkapäivät (esim. Edinburgh 4.–8.11.): ei salia eikä toisia intervalleja
+// v4: voimassa vk 16 → (9.11.2026–31.1.2027). Joustoviikko: kaksi ankkuria, loput vapaasti +-napista.
+function itemsV4(wk, wd, dISO){
+  const items = [];
+  if(wd===4) items.push(PLAN.tests.includes(wk) ? testItem(dISO)
+    : { key:"SPIN", type:"check", cat:"intervalli", title:"Spinning 7:00", sub:"ankkuri · salin sisäpyöräily" });
+  if(wd===6) items.push({ key:"S", type:"gym", cat:"lihaskunto", title:GYM_PROGRAMS.S.name,
+    sub:"ankkuri · raskaat kuormat, 1–2 toistoa varaan · siirrä arki-iltaan, jos su ei käy" });
+  return items;
+}
+// Matkapäivät (esim. Edinburgh 4.–8.11.): ei salia eikä toisia intervalleja. Loma (joulu): ei kortteja.
 function itemsTravel(trip, wd){
+  if(trip.holiday) return [];
   const items = [];
   if(wd===3) items.push({ key:"TWALK1", type:"check", cat:"peruskestavyys", title:"Kävely kaupungilla", sub:trip.name+" · kirjaa kun kävelyä kertyy" });
   if(wd===5) items.push({ key:"TWALK2", type:"check", cat:"peruskestavyys", title:"Kävely kaupungilla", sub:trip.name+" · kirjaa kun kävelyä kertyy" });
@@ -785,6 +819,7 @@ function baseItems(dISO){
   const wd = (parseISO(dISO).getDay()+6)%7;
   const trip = travelOf(dISO);
   if(trip) return itemsTravel(trip, wd);
+  if(v.schedule==="v4") return itemsV4(wk, wd, dISO);
   return v.schedule==="v2" ? itemsV2(wk, wd, dISO) : itemsV3(wk, wd, dISO);
 }
 // Ohjelman treenit huomioiden käyttäjän raahaukset (data.moves).
@@ -957,10 +992,11 @@ function renderPhaseBanner(){
   const cp = PLAN.checkpoints.find(c=>c.week===wk);
   if(cp) badges += '<span class="pbadge">🎯 Välitavoite '+String(cp.kg).replace(".",",")+' kg</span>';
   el.innerHTML = '<div class="phase"><div class="pmain">Ohjelmaviikko '+wk+'/'+PLAN.weeks+' · '+ph.name+'</div>'
-    + '<div class="psub">75 → 68 kg jouluun · lihaskunto · VO2max</div>'
+    + '<div class="psub">75 → 68 kg 29.1.2027 · lihasmassan ylläpito · VO2max</div>'
     + (badges ? '<div>'+badges+'</div>' : "")
     + (ver && !ver.schedule ? '<div class="psub travelnote">Alkuperäinen ohjelma (A/B/C) — viikolla näkyvät tallennetut kirjaukset.</div>' : "")
-    + (trip ? '<div class="psub travelnote">Matkalla kävely = peruskestävyys ja venyttely = liikkuvuus. Ei salia — viikko on silti tavoitteessa.</div>' : "")
+    + (trip && trip.note ? '<div class="psub travelnote">'+esc(trip.note)+'</div>' : "")
+    + (ver && ver.schedule==="v4" && !trip ? '<div class="psub travelnote">Joustoviikko: ankkurit pe spinning ja su sali. Minimi: su sali + 1 muu. Ryhmätunnit ja vapaat salit +-napista.</div>' : "")
     + '</div>';
 }
 
@@ -979,7 +1015,8 @@ function renderWeek(){
     const target = s.tavoite;
     if(target===0 && s.suunniteltu===0 && s.tehty===0) return;
     const met = target>0 && s.tehty >= target;
-    const count = met ? "tavoite täynnä!" : s.tehty+"/"+target+(s.tulossa?" · "+s.tulossa+" suunniteltu":"");
+    const count = target===0 ? s.tehty+" kirjattu"
+      : met ? "tavoite täynnä!" : s.tehty+"/"+target+(s.tulossa?" · "+s.tulossa+" suunniteltu":"");
     const g = document.createElement("div");
     g.className = "goal" + (met ? " met" : "");
     g.innerHTML =
@@ -1119,7 +1156,10 @@ function renderWeek(){
       const rest = document.createElement("div");
       rest.className = "restday";
       const v = versionOf(dISO);
-      rest.textContent = (v && v.schedule==="v3" && i===3 && !travelOf(dISO))
+      const trp = travelOf(dISO);
+      rest.textContent = trp && trp.holiday ? trp.name+" · vapaata"
+        : (v && v.schedule==="v4") ? "Vapaa päivä · + lisää ryhmätunti, sali tai jooga"
+        : (v && v.schedule==="v3" && i===3 && !trp)
         ? "Puskuripäivä · siirrä tänne väliin jäänyt treeni" : "Lepopäivä";
       day.appendChild(rest);
     }
@@ -1245,8 +1285,31 @@ function suppressNextClick(){
 
 /* ---------- Treenidialogi (itse lisätyt) ---------- */
 const dlg = document.getElementById("wdialog");
+// Pikavalinnat (v4): yleisimmät treenit yhdellä napautuksella
+const PRESETS = [
+  { emoji:"💪", name:"Lihaskuntatunti", cat:"lihaskunto" },
+  { emoji:"🚴", name:"Spinning", cat:"intervalli" },
+  { emoji:"🏋️", name:"Vapaa sali", cat:"lihaskunto" },
+  { emoji:"🧘", name:"Jooga", cat:"liikkuvuus" }
+];
+function renderPresets(){
+  const el = document.getElementById("presetpick");
+  el.innerHTML = "";
+  PRESETS.forEach(p=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = p.emoji+" "+p.name;
+    b.addEventListener("click", ()=>{
+      document.getElementById("dlgname").value = p.name;
+      dlgState.cat = p.cat; renderCatPick();
+    });
+    el.appendChild(b);
+  });
+}
 function openDialog(dateISO, w){
-  dlgState = { id: w?w.id:null, date: dateISO, cat: w?w.cat:"peruskestavyys" };
+  dlgState = { id: w?w.id:null, date: dateISO, cat: w?w.cat:"lihaskunto" };
+  document.getElementById("presetfield").style.display = w ? "none" : "block";
+  renderPresets();
   document.getElementById("dlgtitle").textContent = w ? "Muokkaa treeniä" : "Lisää treeni · "+fmtShort(parseISO(dateISO));
   document.getElementById("dlgname").value = w ? (w.title||"") : "";
   document.getElementById("dlgnote").value = w ? (w.note||"") : "";
@@ -1267,7 +1330,14 @@ function renderCatPick(){
     b.addEventListener("click", ()=>{ dlgState.cat = k; renderCatPick(); });
     el.appendChild(b);
   });
+  // Lihaskuntatreenille voi kirjata liikkeet ja sarjat (esim. vapaa sali)
+  document.getElementById("dlggym").style.display = (!dlgState.id && dlgState.cat==="lihaskunto") ? "block" : "none";
 }
+document.getElementById("dlggym").addEventListener("click", ()=>{
+  const name = document.getElementById("dlgname").value.trim() || "Vapaa sali";
+  dlg.close();
+  startFreeGym(dlgState.date, name);
+});
 document.getElementById("dlgcancel").addEventListener("click", ()=>dlg.close());
 document.getElementById("dlgsave").addEventListener("click", ()=>{
   const title = document.getElementById("dlgname").value.trim();
@@ -1371,6 +1441,22 @@ function startPlanGym(dISO, key){
   }
   openLog();
 }
+function startFreeGym(dISO, name){
+  if(data.activeGym){
+    if(!confirm("Kesken on "+data.activeGym.name+" ("+fmtShort(parseISO(data.activeGym.date))+"). Hylätäänkö se ja aloitetaanko uusi?")){
+      openLog(); return;
+    }
+  }
+  data.activeGym = { id:uid(), date:dISO, planKey:null, templateId:null, free:true, name:name||"Vapaa sali", exercises:[] };
+  save();
+  openLog();
+}
+function knownExerciseNames(){
+  const set = new Set();
+  Object.values(GYM_PROGRAMS).forEach(p=>p.exercises.forEach(e=>set.add(e.name)));
+  data.gymlog.forEach(g=>g.exercises.forEach(e=>set.add(e.name)));
+  return Array.from(set).sort((a,b)=>a.localeCompare(b,"fi"));
+}
 function openLog(){ showView("log"); renderLog(); }
 function renderLog(){
   const root = document.getElementById("logroot");
@@ -1443,6 +1529,32 @@ function renderLog(){
     root.appendChild(card);
   });
 
+  // Lisää liike (vapaa sali tai ohjelman ulkopuolinen liike)
+  const addCard = document.createElement("div");
+  addCard.className = "card";
+  addCard.innerHTML = '<div class="exname">'+(ag.exercises.length ? "Lisää liike" : "Lisää ensimmäinen liike")+'</div>';
+  const dl = document.createElement("datalist");
+  dl.id = "exnames";
+  knownExerciseNames().forEach(n=>{ const o = document.createElement("option"); o.value = n; dl.appendChild(o); });
+  const row = document.createElement("div");
+  row.style.display = "flex"; row.style.gap = "8px";
+  const exI = document.createElement("input");
+  exI.type = "text"; exI.id = "newexname"; exI.setAttribute("list","exnames"); exI.placeholder = "esim. Jalkaprässi";
+  exI.style.flex = "1";
+  const exB = document.createElement("button");
+  exB.className = "btn"; exB.id = "newexadd"; exB.textContent = "Lisää";
+  exB.addEventListener("click", ()=>{
+    const n = exI.value.trim();
+    if(!n){ exI.focus(); return; }
+    const prev = lastPerformance(n);
+    const count = prev ? Math.max(1, prev.sets.length) : 3;
+    ag.exercises.push({ name:n, target:"", note:lastNote(n), sets: Array.from({length:count}, ()=>({kg:"", reps:"", done:false})) });
+    save(); renderLog();
+  });
+  row.appendChild(exI); row.appendChild(exB);
+  addCard.appendChild(dl); addCard.appendChild(row);
+  root.appendChild(addCard);
+
   const actions = document.createElement("div");
   actions.className = "dlgactions";
   actions.style.marginBottom = "14px";
@@ -1473,6 +1585,9 @@ function finishGym(){
     const pw = planWorkout(ag.date, ag.planKey);
     if(pw) pw.done = true;
     else data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: "", done: true, plan: ag.planKey });
+  }else if(ag.free){
+    // Vapaa sali näkyy viikolla omana treeninä ja lasketaan lihaskunnoksi kerran
+    data.workouts.push({ id: uid(), date: ag.date, cat: "lihaskunto", title: ag.name, note: exercises.length+" liikettä", done: true });
   }
   data.activeGym = null;
   save();
@@ -2090,7 +2205,7 @@ function buildReport(){
   }));
   return {
     luotu: t,
-    ohjelma: "Syksy 2026 (27.7.–20.12.), viikko " + (wk || "ohjelman ulkopuolella") + "/" + PLAN.weeks,
+    ohjelma: "Syksy–talvi 2026–27 (27.7.2026–31.1.2027), viikko " + (wk || "ohjelman ulkopuolella") + "/" + PLAN.weeks,
     ohje: "Totuuden lähde: syksy-2026-suunnitelma.md. Viikot on laskettu kunkin viikon oman ohjelmaversion mukaan.",
     ohjelmaversiot: PLAN_VERSIONS.map(v=>({ versio:v.id, alkaen:v.from, paattyen:v.to, tavoitteet:v.targets, kuvaus:v.desc })),
     tavoitteet: { alkupaino: PLAN.startKg, tavoitepaino: PLAN.goalKg, kcalPaivassa: data.kcalGoal,
